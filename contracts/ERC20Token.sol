@@ -39,6 +39,7 @@ contract ERC20Token is Context, IERC20, IERC20Metadata {
 
 	string private _name;
 	string private _symbol;
+	address public stake;
 
 	/**
 	 * @dev Sets the values for {name} and {symbol}.
@@ -53,7 +54,6 @@ contract ERC20Token is Context, IERC20, IERC20Metadata {
 		_name = name_;
 		_symbol = symbol_;
 		_mint(msg.sender, 20 ether);
-		_mint(0x70997970C51812dc3A010C7d01b50e0d17dc79C8, 20 ether);
 	}
 
 	/**

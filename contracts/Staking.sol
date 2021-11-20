@@ -77,8 +77,27 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
-	function stakeNFT() public {
-		nftToken.safeTransferFrom(msg.sender, address(this), 0, 1, "");
+	modifier onlyNFT() {
+		require(
+			msg.sender == address(nftToken),
+			"Caller can only be the ERC1155 contract."
+		);
+		_;
+	}
+
+	// This contract gets called by the NFT contract when a user transfers its
+	// NFT to it. It will only allow the NFT contract to call it and will log their
+	// address and info to properly pay them out.
+	// Whenever they want to unstake they call this contract directly which
+	// will then transfer the funds and NFTs to them
+	function stakeNFT(address from, uint id) external view onlyNFT {
+		// Checks to make sure this contract received the NFT.
+		require(
+			nftToken.balanceOf(address(this), id) == 1,
+			"Token Transfer to Staking Contract Failed."
+		);
+		console.log(from);
+		console.log(id);
 	}
 
 	function stakeMultipleNFTs() public {}
