@@ -13,35 +13,31 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	IERC1155 public nftToken;
 	IERC20 public erc20Token;
 
-	uint256 public tokensPerBlock = .02 ether;
+	uint public tokensPerBlock;
 
 	struct Stake {
-		uint256 stakedFromBlock;
+		uint stakedFromBlock;
 		address owner;
 	}
 
 	// TokenID => Stake
-	mapping(uint256 => Stake) public receipt;
+	mapping(uint => Stake) public receipt;
 
-	event NftStaked(address indexed staker, uint256 tokenId, uint256 blockNumber);
-	event NftUnStaked(
-		address indexed staker,
-		uint256 tokenId,
-		uint256 blockNumber
-	);
+	event NftStaked(address indexed staker, uint tokenId, uint blockNumber);
+	event NftUnStaked(address indexed staker, uint tokenId, uint blockNumber);
 	event StakePayout(
 		address indexed staker,
-		uint256 tokenId,
-		uint256 stakeAmount,
-		uint256 fromBlock,
-		uint256 toBlock
+		uint tokenId,
+		uint stakeAmount,
+		uint fromBlock,
+		uint toBlock
 	);
-	event StakeRewardUpdated(uint256 rewardPerBlock);
+	event StakeRewardUpdated(uint rewardPerBlock);
 
 	constructor(
 		IERC1155 _nftToken,
 		IERC20 _erc20Token,
-		uint256 _tokensPerBlock
+		uint _tokensPerBlock
 	) {
 		nftToken = _nftToken;
 		erc20Token = _erc20Token;
@@ -72,7 +68,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// 	_;
 	// }
 
-	modifier requireTimeElapsed(uint256 tokenId) {
+	modifier requireTimeElapsed(uint tokenId) {
 		// require that some time has elapsed (IE you can not stake and unstake in the same block)
 		require(
 			receipt[tokenId].stakedFromBlock < block.number,
