@@ -4,6 +4,8 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "hardhat/console.sol";
+
 contract NFTs is ERC1155Supply, Ownable {
 	// Here you would define your game items, like the  accessories, treats, etc.
 
