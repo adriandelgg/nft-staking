@@ -68,5 +68,11 @@ describe('Staking', function () {
 			'Gas cost: ' +
 				(await nft.estimateGas.stakeMultipleNFTs([0, 1, 2, 3, 4])).toString()
 		);
+
+		await nft.stakeMultipleNFTs([0, 1, 2, 3, 4]);
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(owner.address, i)).to.equal(0);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
+		}
 	});
 });

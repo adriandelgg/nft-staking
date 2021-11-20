@@ -36,6 +36,7 @@ contract NFTs is ERC1155Supply, Ownable {
 	}
 
 	function stakeMultipleNFTs(uint[] calldata ids) external {
+		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](ids.length);
 		for (uint i; i < ids.length; i++) {
 			require(totalSupply(ids[i]) == 1, "Token ID is not an NFT");

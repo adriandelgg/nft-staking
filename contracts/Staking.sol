@@ -128,30 +128,48 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	function unstakeNFT(uint tokenId) external {
+	function unstakeNFT(uint tokenId) external nonReentrant {
 		_onlyStaker(tokenId);
 		_requireTimeElapsed(tokenId);
+		_payoutStake(tokenId);
+		nftToken.safeTransferFrom(address(this), msg.sender, tokenId, 1, "");
 	}
 
-	function unstakeMultipleNFTs(uint[] calldata tokenIds) external {
+	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
+		// Array needed to pay out the NFTs
+		uint[] memory amounts = new uint[](tokenIds.length);
+
 		for (uint256 i; i < tokenIds.length; i++) {
 			uint id = tokenIds[i]; // gas saver
+
 			_onlyStaker(id);
 			_requireTimeElapsed(id);
+			_payoutStake(id);
+			amounts[i] = 1;
+
+			// Could possibly create a new event called NFTsUnstaked but would lead to some inconsitencies
+			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
+
+		nftToken.safeBatchTransferFrom(
+			address(this),
+			msg.sender,
+			tokenIds,
+			amounts,
+			""
+		);
 	}
 
-	function _payoutStake(uint256 tokenId) internal {
-		/* NOTE : Must be called from non-reentrant function to be safe!*/
-
+	function _payoutStake(uint256 tokenId) private {
+		Stake memory _tokenId = receipt[tokenId]; // gas saver
 		// double check that the receipt exists and we're not staking from block 0
 		require(
-			receipt[tokenId].stakedFromBlock > 0,
+			_tokenId.stakedFromBlock > 0,
 			"_payoutStake: Can not stake from block 0"
 		);
 
 		// earned amount is difference between the stake start block, current block multiplied by stake amount
-		uint256 timeStaked = _getTimeStaked(tokenId) - 1; // don't pay for the tx block of withdrawl
+		uint256 timeStaked = (block.number - receipt[tokenId].stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
 		uint256 payout = timeStaked * tokensPerBlock;
 
 		// If contract does not have enough tokens to pay out, return the NFT without payment
@@ -161,30 +179,21 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 				msg.sender,
 				tokenId,
 				0,
-				receipt[tokenId].stakedFromBlock,
+				_tokenId.stakedFromBlock,
 				block.number
 			);
-			return;
+		} else {
+			// payout stake
+			erc20Token.transfer(_tokenId.owner, payout);
+
+			emit StakePayout(
+				msg.sender,
+				tokenId,
+				payout,
+				_tokenId.stakedFromBlock,
+				block.number
+			);
 		}
-
-		// payout stake
-		erc20Token.transfer(receipt[tokenId].owner, payout);
-
-		emit StakePayout(
-			msg.sender,
-			tokenId,
-			payout,
-			receipt[tokenId].stakedFromBlock,
-			block.number
-		);
-	}
-
-	function _getTimeStaked(uint256 tokenId) internal view returns (uint) {
-		if (receipt[tokenId].stakedFromBlock == 0) {
-			return 0;
-		}
-
-		return block.number - receipt[tokenId].stakedFromBlock;
 	}
 
 	function harvestRewards(uint tokenId) external {}
