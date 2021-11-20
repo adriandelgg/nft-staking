@@ -16,15 +16,15 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	uint public tokensPerBlock;
 
 	struct Stake {
-		uint stakedFromBlock;
 		address owner;
+		uint stakedFromBlock;
 	}
 
 	// TokenID => Stake
 	mapping(uint => Stake) public receipt;
 
-	event NftStaked(address indexed staker, uint tokenId, uint blockNumber);
-	event NftUnStaked(address indexed staker, uint tokenId, uint blockNumber);
+	event NFTStaked(address indexed staker, uint tokenId, uint blockNumber);
+	event NFTUnStaked(address indexed staker, uint tokenId, uint blockNumber);
 	event StakePayout(
 		address indexed staker,
 		uint tokenId,
@@ -80,9 +80,19 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	modifier onlyNFT() {
 		require(
 			msg.sender == address(nftToken),
-			"Caller can only be the ERC1155 contract."
+			"Stake: Caller can only be the ERC1155 contract"
 		);
 		_;
+	}
+
+	function getStakeContractBalance() public view returns (uint) {
+		return erc20Token.balanceOf(address(this));
+	}
+
+	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
+		tokensPerBlock = _tokensPerBlock;
+
+		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
 	// This contract gets called by the NFT contract when a user transfers its
@@ -90,15 +100,35 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// address and info to properly pay them out.
 	// Whenever they want to unstake they call this contract directly which
 	// will then transfer the funds and NFTs to them
-	function stakeNFT(address from, uint id) external view onlyNFT {
+	function stakeNFT(address from, uint tokenId) external onlyNFT {
 		// Checks to make sure this contract received the NFT.
 		require(
-			nftToken.balanceOf(address(this), id) == 1,
-			"Token Transfer to Staking Contract Failed."
+			nftToken.balanceOf(address(this), tokenId) == 1,
+			"Stake: Token Transfer Failed"
 		);
-		console.log(from);
-		console.log(id);
+
+		receipt[tokenId].owner = from;
+		receipt[tokenId].stakedFromBlock = block.number;
+
+		emit NFTStaked(from, tokenId, block.number);
 	}
 
-	function stakeMultipleNFTs() public {}
+	function stakeMultipleNFTs(address from, uint[] calldata tokenIds)
+		external
+		onlyNFT
+	{
+		for (uint i; i < tokenIds.length; i++) {
+			uint tokenId = tokenIds[i]; // gas saver
+			// Checks to make sure this contract received the NFT.
+			require(
+				nftToken.balanceOf(address(this), tokenId) == 1,
+				"Stake: Token Transfer Failed"
+			);
+
+			receipt[tokenId].owner = from;
+			receipt[tokenId].stakedFromBlock = block.number;
+
+			emit NFTStaked(from, tokenId, block.number);
+		}
+	}
 }

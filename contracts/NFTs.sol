@@ -8,6 +8,8 @@ import "hardhat/console.sol";
 
 interface IStaking {
 	function stakeNFT(address from, uint id) external;
+
+	function stakeMultipleNFTs(address from, uint[] calldata tokenIds) external;
 }
 
 contract NFTs is ERC1155Supply, Ownable {
@@ -25,11 +27,29 @@ contract NFTs is ERC1155Supply, Ownable {
 		stakingContract = IStaking(_contract);
 	}
 
-	function stakeNFT(uint id) public {
+	// Transfers NFT from caller to the staking contract.
+	function stakeNFT(uint id) external {
 		// Check to make sure it's actually an NFT
 		require(totalSupply(id) == 1, "Token ID is not an NFT");
 		safeTransferFrom(msg.sender, address(stakingContract), id, 1, "");
 		stakingContract.stakeNFT(msg.sender, id);
+	}
+
+	function stakeMultipleNFTs(uint[] calldata ids) external {
+		uint[] memory amounts = new uint[](ids.length);
+		for (uint i; i < ids.length; i++) {
+			require(totalSupply(ids[i]) == 1, "Token ID is not an NFT");
+			amounts[i] = 1;
+		}
+
+		safeBatchTransferFrom(
+			msg.sender,
+			address(stakingContract),
+			ids,
+			amounts,
+			""
+		);
+		stakingContract.stakeMultipleNFTs(msg.sender, ids);
 	}
 
 	function mint(

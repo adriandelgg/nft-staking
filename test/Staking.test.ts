@@ -50,10 +50,23 @@ describe('Staking', function () {
 	it('should transfer NFT to stake contract', async () => {
 		await nft.mint(owner.address, 0, 1, []);
 		expect(await nft.balanceOf(owner.address, 0)).to.equal(1);
+		console.log('Gas cost: ' + (await nft.estimateGas.stakeNFT(0)).toString());
 		await nft.stakeNFT(0);
 
 		expect(await nft.balanceOf(owner.address, 0)).to.equal(0);
 		expect(await nft.balanceOf(stake.address, 0)).to.equal(1);
 		// await stake.stakeNFT();
+	});
+
+	it('should transfer multiple NFTs to stake contract', async () => {
+		await nft.mintBatch(owner.address, [0, 1, 2, 3, 4], [1, 1, 1, 1, 1], []);
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(owner.address, i)).to.equal(1);
+		}
+
+		console.log(
+			'Gas cost: ' +
+				(await nft.estimateGas.stakeMultipleNFTs([0, 1, 2, 3, 4])).toString()
+		);
 	});
 });
