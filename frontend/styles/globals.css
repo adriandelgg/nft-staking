@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	font-family: 'Roboto', sans-serif;
+	/* height: 100%; */
+	@apply bg-gray-50 dark:bg-gray-800 dark:text-indigo-50;
+}
+
+button {
+	@apply dark:shadow-2xl;
+}
+
+ol {
+	@apply list-decimal;
+}
+
+ul {
+	@apply list-disc;
+}
+
+header {
+	animation: fadeInDown 1.5s;
+}
+
+main {
+	animation: fadeInUp 1.5s;
+}
+
+footer {
+	animation: fadeInUp 1.5s;
+}
+
+.fade-in {
+	animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+	}
+}
+
+@keyframes fadeInDown {
+	0% {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+}
+
+@keyframes fadeInUp {
+	0% {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+}
+
+.link {
+	@apply underline text-blue-600 hover:text-blue-800
+	dark:hover:text-blue-300 dark:text-blue-400;
+}
+
+.p-clamp {
+	width: clamp(45ch, 50%, 75ch);
+}
+
+.nav-item {
+	@apply text-green-bp1 hover:text-green-800 px-2 list-none
+	font-medium text-lg dark:text-green-bp2 dark:hover:text-yellow-400;
+}
+
+.active-nav {
+	@apply border-b-2 border-green-300 text-green-bp1 list-none
+	hover:text-green-800 hover:border-green-800 px-2
+	font-medium text-lg dark:text-green-bp2 dark:hover:text-yellow-400
+	dark:border-green-300 dark:hover:border-yellow-400;
+}
+
+.main-heading {
+	@apply text-3xl text-center font-bold mt-8;
+}
+
+.h3-heading {
+	@apply text-xl text-center font-bold;
+}
+
+.input-field {
+	@apply shadow appearance-none border rounded py-2 px-3
+	text-gray-700 leading-tight focus:outline-none focus:border-green-500
+	dark:bg-gray-700 dark:text-gray-100 dark:border-gray-300 dark:shadow-2xl
+	dark:focus:border-green-500;
+}
+
+.input-label {
+	@apply px-1 pt-3 pb-1 font-medium text-lg;
+}
+
+.action-card {
+	@apply flex flex-col p-5 border w-min bg-blueGray-50
+	rounded-lg shadow dark:shadow-2xl dark:bg-coolGray-800;
+}
+
+.prediction-form {
+	@apply flex flex-col p-7 border w-max bg-blueGray-50
+	rounded-lg shadow dark:shadow-2xl dark:bg-coolGray-800;
+}
+
+.repeated-attendance {
+	@apply flex flex-col p-5 border w-max bg-blueGray-50
+	rounded-lg shadow dark:shadow-2xl dark:bg-coolGray-800;
+}
+
+.game-card {
+	@apply flex flex-col p-5 my-2 border
+	rounded-lg shadow dark:shadow-2xl;
+}
+
+.green-btn {
+	@apply text-white font-bold py-1 px-4 mt-5
+	rounded bg-green-bp1 hover:bg-green-bp3
+	shadow dark:shadow-2xl;
+}
+
+.metamask-btn {
+	@apply text-white font-bold py-1 px-4
+	rounded bg-green-bp1 hover:bg-green-bp3
+	shadow dark:shadow-2xl;
+}
+
+.blue-btn {
+	@apply bg-blue-500 hover:bg-blue-600 text-white
+	font-bold py-1 px-4 rounded shadow dark:shadow-2xl;
+}
+
+.disabled-btn {
+	@apply bg-gray-500 text-white font-bold py-2 px-4
+	rounded opacity-50 cursor-not-allowed shadow dark:shadow-2xl;
+}
+
+.nft-card {
+	@apply m-10 max-w-xs rounded-2xl overflow-hidden
+	shadow-xl dark:shadow-2xl dark:bg-gray-700
+	bg-coolGray-100;
+}
