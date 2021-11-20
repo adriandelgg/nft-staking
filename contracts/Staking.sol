@@ -46,35 +46,32 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
-	// modifier onlyStaker(uint256 tokenId) {
-	// 	// require that this contract has the NFT
-	// 	require(
-	// 		nftToken.ownerOf(tokenId) == address(this),
-	// 		"onlyStaker: Contract is not owner of this NFT"
-	// 	);
+	function _onlyStaker(uint tokenId) private view {
+		// require that this contract has the NFT
+		require(
+			nftToken.balanceOf(address(this), tokenId) == 1,
+			"onlyStaker: Contract is not owner of this NFT"
+		);
 
-	// 	// require that this token is staked
-	// 	require(
-	// 		receipt[tokenId].stakedFromBlock != 0,
-	// 		"onlyStaker: Token is not staked"
-	// 	);
+		// require that this token is staked
+		require(
+			receipt[tokenId].stakedFromBlock != 0,
+			"onlyStaker: Token is not staked"
+		);
 
-	// 	// require that msg.sender is the owner of this nft
-	// 	require(
-	// 		receipt[tokenId].owner == msg.sender,
-	// 		"onlyStaker: Caller is not NFT stake owner"
-	// 	);
+		// require that msg.sender is the owner of this nft
+		require(
+			receipt[tokenId].owner == msg.sender,
+			"onlyStaker: Caller is not NFT stake owner"
+		);
+	}
 
-	// 	_;
-	// }
-
-	modifier requireTimeElapsed(uint tokenId) {
-		// require that some time has elapsed (IE you can not stake and unstake in the same block)
+	function _requireTimeElapsed(uint tokenId) private view {
+		// require that some time has elapsed (IE you can NOT stake and unstake in the same block)
 		require(
 			receipt[tokenId].stakedFromBlock < block.number,
 			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
 		);
-		_;
 	}
 
 	modifier onlyNFT() {
@@ -91,7 +88,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
 		tokensPerBlock = _tokensPerBlock;
-
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
@@ -131,4 +127,65 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			emit NFTStaked(from, tokenId, block.number);
 		}
 	}
+
+	function unstakeNFT(uint tokenId) external {
+		_onlyStaker(tokenId);
+		_requireTimeElapsed(tokenId);
+	}
+
+	function unstakeMultipleNFTs(uint[] calldata tokenIds) external {
+		for (uint256 i; i < tokenIds.length; i++) {
+			uint id = tokenIds[i]; // gas saver
+			_onlyStaker(id);
+			_requireTimeElapsed(id);
+		}
+	}
+
+	function _payoutStake(uint256 tokenId) internal {
+		/* NOTE : Must be called from non-reentrant function to be safe!*/
+
+		// double check that the receipt exists and we're not staking from block 0
+		require(
+			receipt[tokenId].stakedFromBlock > 0,
+			"_payoutStake: Can not stake from block 0"
+		);
+
+		// earned amount is difference between the stake start block, current block multiplied by stake amount
+		uint256 timeStaked = _getTimeStaked(tokenId) - 1; // don't pay for the tx block of withdrawl
+		uint256 payout = timeStaked * tokensPerBlock;
+
+		// If contract does not have enough tokens to pay out, return the NFT without payment
+		// This prevent a NFT being locked in the contract when empty
+		if (erc20Token.balanceOf(address(this)) < payout) {
+			emit StakePayout(
+				msg.sender,
+				tokenId,
+				0,
+				receipt[tokenId].stakedFromBlock,
+				block.number
+			);
+			return;
+		}
+
+		// payout stake
+		erc20Token.transfer(receipt[tokenId].owner, payout);
+
+		emit StakePayout(
+			msg.sender,
+			tokenId,
+			payout,
+			receipt[tokenId].stakedFromBlock,
+			block.number
+		);
+	}
+
+	function _getTimeStaked(uint256 tokenId) internal view returns (uint) {
+		if (receipt[tokenId].stakedFromBlock == 0) {
+			return 0;
+		}
+
+		return block.number - receipt[tokenId].stakedFromBlock;
+	}
+
+	function harvestRewards(uint tokenId) external {}
 }
