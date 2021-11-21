@@ -81,24 +81,6 @@ describe('Staking', function () {
 		}
 	});
 
-	// Unpaid because it was unstaked in the same block
-	xit('should unstake 1 NFT without pay', async () => {
-		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
-		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
-		expect(await token.balanceOf(bob.address)).to.equal(0);
-
-		await nft2.stakeNFT(0);
-		expect(await stake.totalNFTsStaked()).to.equal(1);
-		await expect(stake.unstakeNFT(0)).to.be.revertedWith(
-			'onlyStaker: Caller is not NFT stake owner'
-		);
-
-		await stake2.unstakeNFT(0);
-		expect(await stake.totalNFTsStaked()).to.equal(0);
-		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
-		expect(await token.balanceOf(bob.address)).to.equal(0);
-	});
-
 	xit('should unstake 1 NFT with pay', async () => {
 		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
@@ -125,6 +107,61 @@ describe('Staking', function () {
 		expect(await token.balanceOf(bob.address)).to.equal(payout);
 	});
 
+	// Unpaid because it was unstaked in the same block
+	xit('should unstake 1 NFT without pay', async () => {
+		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
+		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
+		expect(await token.balanceOf(bob.address)).to.equal(0);
+
+		await nft2.stakeNFT(0);
+		expect(await stake.totalNFTsStaked()).to.equal(1);
+		await expect(stake.unstakeNFT(0)).to.be.revertedWith(
+			'onlyStaker: Caller is not NFT stake owner'
+		);
+
+		await stake2.unstakeNFT(0);
+		expect(await stake.totalNFTsStaked()).to.equal(0);
+		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
+		expect(await token.balanceOf(bob.address)).to.equal(0);
+	});
+
+	it('should unstake multiple NFTs with pay', async () => {
+		await nft.safeBatchTransferFrom(
+			owner.address,
+			bob.address,
+			tokenIds,
+			amounts,
+			[]
+		);
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
+		}
+
+		await nft2.stakeMultipleNFTs(tokenIds);
+		expect(await stake.totalNFTsStaked()).to.equal(5);
+
+		let stakedBlocks = BigNumber.from(0);
+		for (let i = 0; i <= 4; i++) {
+			// Adds up all the blocks
+			const { stakedFromBlock } = await stake.receipt(i);
+			stakedBlocks = stakedBlocks.add(stakedFromBlock);
+
+			expect(await nft.balanceOf(bob.address, i)).to.equal(0);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
+			await token.setStakingContract(stake.address); // tx to force new blocks
+		}
+
+		const { blockNumber } = await stake2.unstakeMultipleNFTs(tokenIds);
+
+		const timeStaked = BigNumber.from(blockNumber).sub(stakedBlocks).sub(1);
+		const tokensPerBlock = await stake.tokensPerBlock();
+		const payout = timeStaked.mul(tokensPerBlock);
+
+		expect(await token.balanceOf(bob.address)).to.not.equal(payout);
+	});
+
+	// Lets you unstake NFTs without pay if on the same block
 	it('should unstake multiple NFTs without pay', async () => {
 		await nft.safeBatchTransferFrom(
 			owner.address,
@@ -141,17 +178,9 @@ describe('Staking', function () {
 		await nft2.stakeMultipleNFTs(tokenIds);
 		expect(await stake.totalNFTsStaked()).to.equal(5);
 
-		for (let i = 0; i <= 4; i++) {
-			expect(await nft.balanceOf(bob.address, i)).to.equal(0);
-			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
-			await token.setStakingContract(stake.address); // tx to force new blocks
-		}
-
 		await stake2.unstakeMultipleNFTs(tokenIds);
-		expect(await token.balanceOf(bob.address)).to.not.equal(0);
+		expect(await token.balanceOf(bob.address)).to.equal(0);
 	});
-
-	it('should unstake multiple NFTs with pay', async () => {});
 
 	it('should withdraw rewards but not the NFT', async () => {});
 });
