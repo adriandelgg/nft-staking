@@ -155,7 +155,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		uint[] memory amounts = new uint[](tokenIds.length);
 
 		for (uint256 i; i < tokenIds.length; i++) {
-			uint id = tokenIds[i]; // gas saver
+			uint id = tokenIds[i]; // gas save
 
 			_onlyStaker(id);
 			_requireTimeElapsed(id);
