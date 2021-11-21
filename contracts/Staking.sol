@@ -23,6 +23,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// TokenID => Stake
 	mapping(uint => Stake) public receipt;
+	// Staker (owner) => TokenIDs
+	mapping(address => uint[]) public stakedNFTs;
 
 	event NFTStaked(address indexed staker, uint tokenId, uint blockNumber);
 	event NFTUnStaked(address indexed staker, uint tokenId, uint blockNumber);
@@ -47,7 +49,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
-	function checkStackedNFTs(uint[] calldata tokenIds) external view {}
+	function totalNFTsUserStaked(address account) public view returns (uint) {
+		return stakedNFTs[account].length;
+	}
 
 	function _onlyStaker(uint tokenId) private view {
 		// require that this contract has the NFT
@@ -108,6 +112,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 		receipt[tokenId].owner = from;
 		receipt[tokenId].stakedFromBlock = block.number;
+		stakedNFTs[from].push(tokenId);
 		totalNFTsStaked++;
 
 		emit NFTStaked(from, tokenId, block.number);
@@ -119,6 +124,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		external
 		onlyNFT
 	{
+		uint[] storage _stakedNFTs = stakedNFTs[from]; // gas saver
 		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
 			// Checks to make sure this contract received the NFT.
@@ -129,6 +135,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 			receipt[tokenId].owner = from;
 			receipt[tokenId].stakedFromBlock = block.number;
+			_stakedNFTs.push(tokenId);
 
 			emit NFTStaked(from, tokenId, block.number);
 		}
