@@ -14,6 +14,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	IERC20 public erc20Token;
 
 	uint public tokensPerBlock;
+	uint public totalNFTsStaked;
 
 	struct Stake {
 		address owner;
@@ -45,6 +46,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
+
+	function checkStackedNFTs(uint[] calldata tokenIds) external view {}
 
 	function _onlyStaker(uint tokenId) private view {
 		// require that this contract has the NFT
@@ -105,6 +108,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 		receipt[tokenId].owner = from;
 		receipt[tokenId].stakedFromBlock = block.number;
+		totalNFTsStaked++;
 
 		emit NFTStaked(from, tokenId, block.number);
 	}
@@ -126,6 +130,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 			emit NFTStaked(from, tokenId, block.number);
 		}
+		totalNFTsStaked += tokenIds.length;
 	}
 
 	function unstakeNFT(uint tokenId) external nonReentrant {
@@ -133,6 +138,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_requireTimeElapsed(tokenId);
 		_payoutStake(tokenId);
 		nftToken.safeTransferFrom(address(this), msg.sender, tokenId, 1, "");
+		totalNFTsStaked--;
 	}
 
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
@@ -158,6 +164,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			amounts,
 			""
 		);
+		totalNFTsStaked -= tokenIds.length;
 	}
 
 	function _payoutStake(uint256 tokenId) private {
