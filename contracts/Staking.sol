@@ -211,9 +211,19 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// 2 scenarios:
 	//1. Create array and keep track of NFTs that have been staked (very costly)
+	function withdrawRewardsArray() external {}
+
 	//2. Pass in array of NFTs staked (you must remember the NFTs you staked),
 	// then function will check to make sure you are the correct person that staked.
 	// After, the function will calculate the amount to pay.
 	// It must also keep track of the amount that has already been paid.
-	function withdrawRewards(uint tokenIds) external {}
+
+	// Function to withdraw rewards without global array
+	function withdrawRewards(uint[] calldata tokenIds) external {
+		for (uint256 i; i < tokenIds.length; i++) {
+			uint tokenId = tokenIds[i]; // gas saver
+			_payoutStake(tokenId);
+			receipt[tokenId].stakedFromBlock = block.number;
+		}
+	}
 }
