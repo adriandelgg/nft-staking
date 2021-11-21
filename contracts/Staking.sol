@@ -113,6 +113,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit NFTStaked(from, tokenId, block.number);
 	}
 
+	// NOTE: Due to the unavoidable gas limit of the Ethereum network,
+	// a large amount of NFTs transfered could result to a failed transaction.
 	function stakeMultipleNFTs(address from, uint[] calldata tokenIds)
 		external
 		onlyNFT

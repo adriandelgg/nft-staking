@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { parseEther } from '@ethersproject/units';
+import { BigNumber } from '@ethersproject/bignumber';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import {
 	Staking__factory,
@@ -10,10 +11,11 @@ import {
 	ERC20Token__factory,
 	ERC20Token
 } from '../typechain-types/index';
-import { BigNumber } from '@ethersproject/bignumber';
 
 describe('Staking', function () {
 	const oneEther = parseEther('1');
+	const tokenIds = [0, 1, 2, 3, 4];
+	const amounts = [1, 1, 1, 1, 1];
 	let owner: SignerWithAddress,
 		bob: SignerWithAddress,
 		nft: NFTs,
@@ -44,7 +46,7 @@ describe('Staking', function () {
 		await token.setStakingContract(stake.address);
 		expect(await token.balanceOf(stake.address)).to.equal(parseEther('20'));
 		await nft.setStakingContract(stake.address);
-		await nft.mintBatch(owner.address, [0, 1, 2, 3, 4], [1, 1, 1, 1, 1], []);
+		await nft.mintBatch(owner.address, tokenIds, amounts, []);
 		for (let i = 0; i <= 4; i++) {
 			expect(await nft.balanceOf(owner.address, i)).to.equal(1);
 		}
@@ -67,10 +69,10 @@ describe('Staking', function () {
 	xit('should stake multiple NFTs', async () => {
 		console.log(
 			'Gas cost: ' +
-				(await nft.estimateGas.stakeMultipleNFTs([0, 1, 2, 3, 4])).toString()
+				(await nft.estimateGas.stakeMultipleNFTs(tokenIds)).toString()
 		);
 
-		await nft.stakeMultipleNFTs([0, 1, 2, 3, 4]);
+		await nft.stakeMultipleNFTs(tokenIds);
 		expect(await stake.totalNFTsStaked()).to.equal(5);
 
 		for (let i = 0; i <= 4; i++) {
@@ -80,7 +82,7 @@ describe('Staking', function () {
 	});
 
 	// Unpaid because it was unstaked in the same block
-	it('should unstake 1 NFT without pay', async () => {
+	xit('should unstake 1 NFT without pay', async () => {
 		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
 		expect(await token.balanceOf(bob.address)).to.equal(0);
@@ -97,7 +99,7 @@ describe('Staking', function () {
 		expect(await token.balanceOf(bob.address)).to.equal(0);
 	});
 
-	it('should unstake 1 NFT with pay', async () => {
+	xit('should unstake 1 NFT with pay', async () => {
 		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
 		expect(await token.balanceOf(bob.address)).to.equal(0);
@@ -108,7 +110,7 @@ describe('Staking', function () {
 		const { stakedFromBlock } = await stake.receipt(0);
 
 		// Transaction to force new blocks
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 4; i++) {
 			await token.setStakingContract(stake.address);
 		}
 
@@ -117,12 +119,37 @@ describe('Staking', function () {
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
 
 		const timeStaked = BigNumber.from(blockNumber).sub(stakedFromBlock).sub(1);
-		console.log(timeStaked.toString());
+		const tokensPerBlock = await stake.tokensPerBlock();
+		const payout = timeStaked.mul(tokensPerBlock);
 
-		// expect(await token.balanceOf(bob.address)).to.equal(0);
+		expect(await token.balanceOf(bob.address)).to.equal(payout);
 	});
 
-	it('should unstake multiple NFTs without pay', async () => {});
+	it('should unstake multiple NFTs without pay', async () => {
+		await nft.safeBatchTransferFrom(
+			owner.address,
+			bob.address,
+			tokenIds,
+			amounts,
+			[]
+		);
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
+		}
+
+		await nft2.stakeMultipleNFTs(tokenIds);
+		expect(await stake.totalNFTsStaked()).to.equal(5);
+
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(0);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
+			await token.setStakingContract(stake.address); // tx to force new blocks
+		}
+
+		await stake2.unstakeMultipleNFTs(tokenIds);
+		expect(await token.balanceOf(bob.address)).to.not.equal(0);
+	});
 
 	it('should unstake multiple NFTs with pay', async () => {});
 
