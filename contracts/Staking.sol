@@ -223,6 +223,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		for (uint256 i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
 			_payoutStake(tokenId);
+
+			// update receipt with a new block number
 			receipt[tokenId].stakedFromBlock = block.number;
 		}
 	}

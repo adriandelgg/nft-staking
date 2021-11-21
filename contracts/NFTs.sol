@@ -23,6 +23,7 @@ contract NFTs is ERC1155Supply, Ownable {
 		_setURI(newuri);
 	}
 
+	// Staking contract must be set after deployment
 	function setStakingContract(address _contract) public onlyOwner {
 		stakingContract = IStaking(_contract);
 	}
