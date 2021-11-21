@@ -169,15 +169,11 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	function _payoutStake(uint256 tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
-		// double check that the receipt exists and we're not staking from block 0
-		require(
-			_tokenId.stakedFromBlock > 0,
-			"_payoutStake: Can not stake from block 0"
-		);
 
 		// earned amount is difference between the stake start block, current block multiplied by stake amount
-		uint256 timeStaked = (block.number - receipt[tokenId].stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
+		uint256 timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
 		uint256 payout = timeStaked * tokensPerBlock;
+		console.log(payout);
 
 		// If contract does not have enough tokens to pay out, return the NFT without payment
 		// This prevent a NFT being locked in the contract when empty
@@ -203,5 +199,5 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	function harvestRewards(uint tokenId) external {}
+	function withdrawRewards(uint tokenId) external {}
 }
