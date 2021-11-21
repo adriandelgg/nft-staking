@@ -19,6 +19,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	struct Stake {
 		address owner;
 		uint stakedFromBlock;
+		uint amountPaid;
 	}
 
 	// TokenID => Stake
@@ -208,5 +209,11 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	function withdrawRewards(uint tokenId) external {}
+	// 2 scenarios:
+	//1. Create array and keep track of NFTs that have been staked (very costly)
+	//2. Pass in array of NFTs staked (you must remember the NFTs you staked),
+	// then function will check to make sure you are the correct person that staked.
+	// After, the function will calculate the amount to pay.
+	// It must also keep track of the amount that has already been paid.
+	function withdrawRewards(uint tokenIds) external {}
 }
