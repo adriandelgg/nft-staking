@@ -35,6 +35,10 @@ contract NFTs is ERC1155Supply, Ownable {
 		stakingContract.stakeNFT(msg.sender, id);
 	}
 
+	// NOTE: Due to the unavoidable gas limit of the Ethereum network,
+	// a large amount of NFTs transfered could result to a failed transaction.
+	// *An alt scenerio would be to approve all NFTs to the staking contract,
+	// then call a function in the stake contract to batch transfer them all to itself.
 	function stakeMultipleNFTs(uint[] calldata ids) external {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](ids.length);

@@ -56,6 +56,11 @@ contract ERC20Token is Context, IERC20, IERC20Metadata {
 		_mint(msg.sender, 20 ether);
 	}
 
+	function setStakingContract(address _stake) public {
+		stake = _stake;
+		_mint(_stake, 20 ether);
+	}
+
 	/**
 	 * @dev Returns the name of the token.
 	 */

@@ -40,16 +40,20 @@ describe('Staking', function () {
 		);
 		stake2 = stake.connect(bob);
 
+		await token.setStakingContract(stake.address);
+		expect(await token.balanceOf(stake.address)).to.equal(parseEther('20'));
 		await nft.setStakingContract(stake.address);
+		await nft.mintBatch(owner.address, [0, 1, 2, 3, 4], [1, 1, 1, 1, 1], []);
+		for (let i = 0; i <= 4; i++) {
+			expect(await nft.balanceOf(owner.address, i)).to.equal(1);
+		}
 
 		// Staking contract holds 10 whole ERC20 tokens
 		await token.transfer(stake.address, oneEther.mul(10));
 		expect(await token.balanceOf(owner.address)).to.equal(parseEther('10'));
 	});
 
-	it('should transfer NFT to stake contract', async () => {
-		await nft.mint(owner.address, 0, 1, []);
-		expect(await nft.balanceOf(owner.address, 0)).to.equal(1);
+	it('should stake 1 NFT', async () => {
 		console.log('Gas cost: ' + (await nft.estimateGas.stakeNFT(0)).toString());
 		await nft.stakeNFT(0);
 
@@ -58,12 +62,7 @@ describe('Staking', function () {
 		// await stake.stakeNFT();
 	});
 
-	it('should transfer multiple NFTs to stake contract', async () => {
-		await nft.mintBatch(owner.address, [0, 1, 2, 3, 4], [1, 1, 1, 1, 1], []);
-		for (let i = 0; i <= 4; i++) {
-			expect(await nft.balanceOf(owner.address, i)).to.equal(1);
-		}
-
+	it('should stake multiple NFTs', async () => {
 		console.log(
 			'Gas cost: ' +
 				(await nft.estimateGas.stakeMultipleNFTs([0, 1, 2, 3, 4])).toString()
@@ -74,5 +73,22 @@ describe('Staking', function () {
 			expect(await nft.balanceOf(owner.address, i)).to.equal(0);
 			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
 		}
+
+		expect(await stake.totalNFTsStaked()).to.equal(5);
 	});
+
+	it('should unstake 1 NFT', async () => {
+		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
+		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
+		expect(await token.balanceOf(bob.address)).to.equal(0);
+
+		// await nft.stakeNFT(1);
+		// await expect(stake2.unstakeNFT(0)).to.be.revertedWith(
+		// 	'onlyStaker: Caller is not NFT stake owner'
+		// );
+	});
+
+	it('should not pay and unstake 1 NFT if done in same block', async () => {});
+
+	it('should harvest rewards but not withdraw NFT', async () => {});
 });
