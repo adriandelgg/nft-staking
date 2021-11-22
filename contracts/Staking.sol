@@ -201,5 +201,16 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	function withdrawRewards(uint tokenId) external {}
+	// Function to withdraw rewards without global array
+	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
+		for (uint i; i < tokenIds.length; i++) {
+			uint tokenId = tokenIds[i]; // gas saver
+			_onlyStaker(tokenId);
+			_requireTimeElapsed(tokenId);
+			_payoutStake(tokenId);
+
+			// update receipt with a new block number
+			receipt[tokenId].stakedFromBlock = block.number;
+		}
+	}
 }
