@@ -47,7 +47,7 @@ describe('Staking', function () {
 		expect(await token.balanceOf(stake.address)).to.equal(parseEther('20'));
 		await nft.setStakingContract(stake.address);
 		await nft.mintBatch(owner.address, tokenIds, amounts, []);
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i < 5; i++) {
 			expect(await nft.balanceOf(owner.address, i)).to.equal(1);
 		}
 
@@ -75,7 +75,7 @@ describe('Staking', function () {
 		await nft.stakeMultipleNFTs(tokenIds);
 		expect(await stake.totalNFTsStaked()).to.equal(5);
 
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i < 5; i++) {
 			expect(await nft.balanceOf(owner.address, i)).to.equal(0);
 			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
 		}
@@ -133,7 +133,7 @@ describe('Staking', function () {
 			amounts,
 			[]
 		);
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i < 5; i++) {
 			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
 			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
 		}
@@ -142,7 +142,7 @@ describe('Staking', function () {
 		expect(await stake.totalNFTsStaked()).to.equal(5);
 
 		let stakedBlocks = BigNumber.from(0);
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i < 5; i++) {
 			// Adds up all the blocks
 			const { stakedFromBlock } = await stake.receipt(i);
 			stakedBlocks = stakedBlocks.add(stakedFromBlock);
@@ -170,7 +170,7 @@ describe('Staking', function () {
 			amounts,
 			[]
 		);
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i < 5; i++) {
 			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
 			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
 		}

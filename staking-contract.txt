@@ -22,7 +22,7 @@ un-staking (withdraw NFT)
 
 claim rewards
 
-- claim all ERC20 rewards for user while leaving NFTs to accumulate more rewards
+- X claim all ERC20 rewards for user while leaving NFTs to accumulate more rewards
 
 
 call methods

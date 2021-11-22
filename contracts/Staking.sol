@@ -154,8 +154,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
+		uint[] memory nfts = stakedNFTs[msg.sender];
 
-		for (uint256 i; i < tokenIds.length; i++) {
+		for (uint i; i < tokenIds.length; i++) {
 			uint id = tokenIds[i]; // gas save
 
 			_onlyStaker(id);
@@ -177,13 +178,12 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked -= tokenIds.length;
 	}
 
-	function _payoutStake(uint256 tokenId) private {
+	function _payoutStake(uint tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
 
 		// earned amount is difference between the stake start block, current block multiplied by stake amount
-		uint256 timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
-		uint256 payout = timeStaked * tokensPerBlock;
-		console.log(payout);
+		uint timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
+		uint payout = timeStaked * tokensPerBlock;
 
 		// If contract does not have enough tokens to pay out, return the NFT without payment
 		// This prevent a NFT being locked in the contract when empty
@@ -220,8 +220,10 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// Function to withdraw rewards without global array
 	function withdrawRewards(uint[] calldata tokenIds) external {
-		for (uint256 i; i < tokenIds.length; i++) {
+		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
+			_onlyStaker(tokenId);
+			_requireTimeElapsed(tokenId);
 			_payoutStake(tokenId);
 
 			// update receipt with a new block number
