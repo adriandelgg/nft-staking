@@ -19,7 +19,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	struct Stake {
 		address owner;
 		uint stakedFromBlock;
-		uint amountPaid;
 	}
 
 	// TokenID => Stake
@@ -47,6 +46,23 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		erc20Token = _erc20Token;
 		tokensPerBlock = _tokensPerBlock;
 
+		emit StakeRewardUpdated(tokensPerBlock);
+	}
+
+	modifier onlyNFT() {
+		require(
+			msg.sender == address(nftToken),
+			"Stake: Caller can only be the ERC1155 contract"
+		);
+		_;
+	}
+
+	function getStakeContractBalance() public view returns (uint) {
+		return erc20Token.balanceOf(address(this));
+	}
+
+	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
+		tokensPerBlock = _tokensPerBlock;
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
@@ -80,23 +96,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			receipt[tokenId].stakedFromBlock < block.number,
 			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
 		);
-	}
-
-	modifier onlyNFT() {
-		require(
-			msg.sender == address(nftToken),
-			"Stake: Caller can only be the ERC1155 contract"
-		);
-		_;
-	}
-
-	function getStakeContractBalance() public view returns (uint) {
-		return erc20Token.balanceOf(address(this));
-	}
-
-	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
-		tokensPerBlock = _tokensPerBlock;
-		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
 	// This contract gets called by the NFT contract when a user transfers its
@@ -154,7 +153,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
-		uint[] memory nfts = stakedNFTs[msg.sender];
 
 		for (uint i; i < tokenIds.length; i++) {
 			uint id = tokenIds[i]; // gas save
@@ -164,7 +162,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			_payoutStake(id);
 			amounts[i] = 1;
 
-			// Could possibly create a new event called NFTsUnstaked but would lead to some inconsitencies
 			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
 
@@ -178,6 +175,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked -= tokenIds.length;
 	}
 
+	// NOTE: To only be called by a nonReentrant function.
 	function _payoutStake(uint tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
 
@@ -219,7 +217,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// It must also keep track of the amount that has already been paid.
 
 	// Function to withdraw rewards without global array
-	function withdrawRewards(uint[] calldata tokenIds) external {
+	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
 		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
 			_onlyStaker(tokenId);
