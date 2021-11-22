@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity >=0.8.10;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "hardhat/console.sol";
 
 contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	IERC1155 public nftToken;
@@ -47,36 +45,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
-	function checkStackedNFTs(uint[] calldata tokenIds) external view {}
-
-	function _onlyStaker(uint tokenId) private view {
-		// require that this contract has the NFT
-		require(
-			nftToken.balanceOf(address(this), tokenId) == 1,
-			"onlyStaker: Contract is not owner of this NFT"
-		);
-
-		// require that this token is staked
-		require(
-			receipt[tokenId].stakedFromBlock != 0,
-			"onlyStaker: Token is not staked"
-		);
-
-		// require that msg.sender is the owner of this nft
-		require(
-			receipt[tokenId].owner == msg.sender,
-			"onlyStaker: Caller is not NFT stake owner"
-		);
-	}
-
-	function _requireTimeElapsed(uint tokenId) private view {
-		// require that some time has elapsed (IE you can NOT stake and unstake in the same block)
-		require(
-			receipt[tokenId].stakedFromBlock < block.number,
-			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
-		);
-	}
-
 	modifier onlyNFT() {
 		require(
 			msg.sender == address(nftToken),
@@ -94,11 +62,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
-	// This contract gets called by the NFT contract when a user transfers its
-	// NFT to it. It will only allow the NFT contract to call it and will log their
-	// address and info to properly pay them out.
-	// Whenever they want to unstake they call this contract directly which
-	// will then transfer the funds and NFTs to them
 	function stakeNFT(address from, uint tokenId) external onlyNFT {
 		// Checks to make sure this contract received the NFT.
 		require(
@@ -147,7 +110,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
 
-		for (uint256 i; i < tokenIds.length; i++) {
+		for (uint i; i < tokenIds.length; i++) {
 			uint id = tokenIds[i]; // gas saver
 
 			_onlyStaker(id);
@@ -155,7 +118,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			_payoutStake(id);
 			amounts[i] = 1;
 
-			// Could possibly create a new event called NFTsUnstaked but would lead to some inconsitencies
 			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
 
@@ -169,13 +131,25 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked -= tokenIds.length;
 	}
 
+	// Function to withdraw rewards without global array
+	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
+		for (uint i; i < tokenIds.length; i++) {
+			uint tokenId = tokenIds[i]; // gas saver
+			_onlyStaker(tokenId);
+			_requireTimeElapsed(tokenId);
+			_payoutStake(tokenId);
+
+			// update receipt with a new block number
+			receipt[tokenId].stakedFromBlock = block.number;
+		}
+	}
+
 	function _payoutStake(uint256 tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
 
 		// earned amount is difference between the stake start block, current block multiplied by stake amount
 		uint256 timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
 		uint256 payout = timeStaked * tokensPerBlock;
-		console.log(payout);
 
 		// If contract does not have enough tokens to pay out, return the NFT without payment
 		// This prevent a NFT being locked in the contract when empty
@@ -201,16 +175,29 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	// Function to withdraw rewards without global array
-	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
-		for (uint i; i < tokenIds.length; i++) {
-			uint tokenId = tokenIds[i]; // gas saver
-			_onlyStaker(tokenId);
-			_requireTimeElapsed(tokenId);
-			_payoutStake(tokenId);
+	function _onlyStaker(uint tokenId) private view {
+		// require that this contract has the NFT
+		require(
+			nftToken.balanceOf(address(this), tokenId) == 1,
+			"onlyStaker: Contract is not owner of this NFT"
+		);
+		// require that this token is staked
+		require(
+			receipt[tokenId].stakedFromBlock != 0,
+			"onlyStaker: Token is not staked"
+		);
+		// require that msg.sender is the owner of this nft
+		require(
+			receipt[tokenId].owner == msg.sender,
+			"onlyStaker: Caller is not NFT stake owner"
+		);
+	}
 
-			// update receipt with a new block number
-			receipt[tokenId].stakedFromBlock = block.number;
-		}
+	function _requireTimeElapsed(uint tokenId) private view {
+		// require that some time has elapsed (IE you can NOT stake and unstake in the same block)
+		require(
+			receipt[tokenId].stakedFromBlock < block.number,
+			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
+		);
 	}
 }
