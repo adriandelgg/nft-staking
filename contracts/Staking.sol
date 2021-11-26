@@ -124,7 +124,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		external
 		onlyNFT
 	{
-		uint[] storage _stakedNFTs = stakedNFTs[from]; // gas saver
 		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
 			// Checks to make sure this contract received the NFT.
@@ -135,7 +134,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 			receipt[tokenId].owner = from;
 			receipt[tokenId].stakedFromBlock = block.number;
-			_stakedNFTs.push(tokenId);
+			stakedNFTs[from].push(tokenId);
 
 			emit NFTStaked(from, tokenId, block.number);
 		}
@@ -161,7 +160,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
-		uint[] memory _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
+		uint[] storage _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
 
 		for (uint i; i < tokenIds.length; i++) {
 			uint id = tokenIds[i]; // gas saver
@@ -171,8 +170,14 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			_payoutStake(id);
 			amounts[i] = 1;
 
-			stakedNFTs[msg.sender][i] = _stakedNFTs[_stakedNFTs.length - 1];
-			stakedNFTs[msg.sender].pop();
+			// Finds the ID in the array and removes it.
+			for (uint x; x < _stakedNFTs.length; x++) {
+				if (id == _stakedNFTs[x]) {
+					_stakedNFTs[x] = _stakedNFTs[_stakedNFTs.length - 1];
+					_stakedNFTs.pop();
+					break;
+				}
+			}
 
 			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
@@ -218,15 +223,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			);
 		}
 	}
-
-	// 2 scenarios:
-	//1. Create array and keep track of NFTs that have been staked (very costly)
-	function withdrawRewardsArray() external {}
-
-	//2. Pass in array of NFTs staked (you must remember the NFTs you staked),
-	// then function will check to make sure you are the correct person that staked.
-	// After, the function will calculate the amount to pay.
-	// It must also keep track of the amount that has already been paid.
 
 	// Function to withdraw rewards without global array
 	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
