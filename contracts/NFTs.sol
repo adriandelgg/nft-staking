@@ -4,8 +4,6 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
 interface IStaking {
 	function stakeNFT(address from, uint id) external;
 
@@ -23,9 +21,28 @@ contract NFTs is ERC1155Supply, Ownable {
 		_setURI(newuri);
 	}
 
-	// Staking contract must be set after deployment
+	// @note Staking contract must be set after deployment since staking
+	// contract needs the address of this contract on its deployement.
 	function setStakingContract(address _contract) public onlyOwner {
 		stakingContract = IStaking(_contract);
+	}
+
+	function mint(
+		address account,
+		uint id,
+		uint amount,
+		bytes memory data
+	) public onlyOwner {
+		_mint(account, id, amount, data);
+	}
+
+	function mintBatch(
+		address to,
+		uint[] memory ids,
+		uint[] memory amounts,
+		bytes memory data
+	) public onlyOwner {
+		_mintBatch(to, ids, amounts, data);
 	}
 
 	// Transfers NFT from caller to the staking contract.
@@ -56,23 +73,5 @@ contract NFTs is ERC1155Supply, Ownable {
 			""
 		);
 		stakingContract.stakeMultipleNFTs(msg.sender, ids);
-	}
-
-	function mint(
-		address account,
-		uint256 id,
-		uint256 amount,
-		bytes memory data
-	) public onlyOwner {
-		_mint(account, id, amount, data);
-	}
-
-	function mintBatch(
-		address to,
-		uint256[] memory ids,
-		uint256[] memory amounts,
-		bytes memory data
-	) public onlyOwner {
-		_mintBatch(to, ids, amounts, data);
 	}
 }

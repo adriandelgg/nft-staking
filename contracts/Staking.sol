@@ -146,6 +146,14 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_onlyStaker(tokenId);
 		_requireTimeElapsed(tokenId);
 		_payoutStake(tokenId);
+
+		uint[] memory _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
+		for (uint i; i < _stakedNFTs.length; i++) {
+			if (_stakedNFTs[i] == tokenId) {
+				stakedNFTs[msg.sender][i] = _stakedNFTs[_stakedNFTs.length - 1];
+				stakedNFTs[msg.sender].pop();
+			}
+		}
 		nftToken.safeTransferFrom(address(this), msg.sender, tokenId, 1, "");
 		totalNFTsStaked--;
 	}
@@ -153,14 +161,18 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
+		uint[] memory _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
 
 		for (uint i; i < tokenIds.length; i++) {
-			uint id = tokenIds[i]; // gas save
+			uint id = tokenIds[i]; // gas saver
 
 			_onlyStaker(id);
 			_requireTimeElapsed(id);
 			_payoutStake(id);
 			amounts[i] = 1;
+
+			stakedNFTs[msg.sender][i] = _stakedNFTs[_stakedNFTs.length - 1];
+			stakedNFTs[msg.sender].pop();
 
 			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
