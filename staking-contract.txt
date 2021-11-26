@@ -17,7 +17,7 @@ un-staking (withdraw NFT)
 
 - X unstake 1 NFT
 - X unstake all NFTs
-- X unstaking should also claim all pending rewards for that user once the NFT(s) are successfully transfered
+- X unstaking should also claim all pending rewards for that user once the NFT(s) are successfully transferred
 
 
 claim rewards

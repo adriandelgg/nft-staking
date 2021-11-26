@@ -2,9 +2,9 @@
 pragma solidity >=0.8.10;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
@@ -45,6 +45,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
+	// Only the NFT contract can call certain functions
 	modifier onlyNFT() {
 		require(
 			msg.sender == address(nftToken),
@@ -53,15 +54,19 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
+	// Returns the total ERC20 token balance of this contract
 	function getStakeContractBalance() public view returns (uint) {
 		return erc20Token.balanceOf(address(this));
 	}
 
+	// Updates the reward amount per blocks
 	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
 		tokensPerBlock = _tokensPerBlock;
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
+	// Allows a user to stake a single NFT & logs their info to properly pay the out
+	// and perform important security checks.
 	function stakeNFT(address from, uint tokenId) external onlyNFT {
 		// Checks to make sure this contract received the NFT.
 		require(
@@ -98,6 +103,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked += tokenIds.length;
 	}
 
+	// Allows the user to unstake 1 NFT & pays them. If they withdraw in the same exact
+	// block, they will only withdraw and not receive any rewards.
 	function unstakeNFT(uint tokenId) external nonReentrant {
 		_onlyStaker(tokenId);
 		_requireTimeElapsed(tokenId);
@@ -106,6 +113,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked--;
 	}
 
+	// Allows users to unstake multiple NFTs in a single transaction.
+	// Will not reward anything if unstaked within the same block the NFT was given.
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
@@ -121,6 +130,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
 		}
 
+		// Transfers NFTs after rewards have been properly paid out
 		nftToken.safeBatchTransferFrom(
 			address(this),
 			msg.sender,
@@ -131,7 +141,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked -= tokenIds.length;
 	}
 
-	// Function to withdraw rewards without global array
+	// Allows the user to withdraw their rewards without unstaking their NFT
 	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
 		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
@@ -144,12 +154,13 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	function _payoutStake(uint256 tokenId) private {
+	// Function to calculate the payout amount for a staked NFT
+	function _payoutStake(uint tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
 
 		// earned amount is difference between the stake start block, current block multiplied by stake amount
-		uint256 timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
-		uint256 payout = timeStaked * tokensPerBlock;
+		uint timeStaked = (block.number - _tokenId.stakedFromBlock) - 1; // don't pay for the tx block of withdrawl
+		uint payout = timeStaked * tokensPerBlock;
 
 		// If contract does not have enough tokens to pay out, return the NFT without payment
 		// This prevent a NFT being locked in the contract when empty
@@ -175,6 +186,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
+	// Used to make sure that only the person that staked the NFT is allowed
+	// to withdraw or interact with the function.
 	function _onlyStaker(uint tokenId) private view {
 		// require that this contract has the NFT
 		require(
@@ -193,8 +206,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		);
 	}
 
+	// Requires that some time has elapsed (IE you can NOT stake and unstake in the same block)
 	function _requireTimeElapsed(uint tokenId) private view {
-		// require that some time has elapsed (IE you can NOT stake and unstake in the same block)
 		require(
 			receipt[tokenId].stakedFromBlock < block.number,
 			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
