@@ -1,0 +1,48 @@
+-----staking contract-----
+
+deployment arguments
+
+- X contract address of NFT collection to be stakable (whitelist)
+- X how many tokens are emitted per block as rewards
+
+
+staking (deposit NFT)
+
+- X stake 1 NFT the user owns
+- X stake all approved NFTs the user has
+- X contract should take control of the NFT and log the block to keep track of rewards
+
+
+un-staking (withdraw NFT)
+
+- X unstake 1 NFT
+- X unstake all NFTs
+- X unstaking should also claim all pending rewards for that user once the NFT(s) are successfully transfered
+
+
+claim rewards
+
+- X claim all ERC20 rewards for user while leaving NFTs to accumulate more rewards
+
+
+call methods
+
+- X erc20 balance of the contract
+- X reward token per block
+- X total NFTs staked by all users
+- ! how many NFTs the user has staked
+- ! Which NFTs the user has staked by ID (array usable by front end to withdraw/claim reward)
+   ! NOTE: (Highly do NOT advise due to extremely high gas costs and is unnecessary. This will provide a bad user experience due to the
+   user having to pay more gas, thus making your app more expensive to use!!
+   I recommend storing these values in an off-chain database, or having the user simply remember which NFTs they've staked.
+   They won't be able to unstake or collect rewards on NFTs that weren't theirs due to the checks in place in the contract.
+   If they forget their NFT token ID, they can look on Etherscan at their previous transactions to see their token IDs that were transferred.)
+
+
+security
+
+- X one block must pass before user can claim reward
+- X rewards should be (number of blocks since stake - current block) to avoid exploit
+
+
+
