@@ -7,14 +7,12 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
 contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	IERC1155 public nftToken;
 	IERC20 public erc20Token;
 
-	uint public tokensPerBlock;
-	uint public totalNFTsStaked;
+	uint public tokensPerBlock; // the amount of tokens rewarded per block staked
+	uint public totalNFTsStaked; // the total amount of NFTs that have been staked to the contract
 
 	struct Stake {
 		address owner;
@@ -23,7 +21,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// TokenID => Stake
 	mapping(uint => Stake) public receipt;
-	// Staker (owner) => TokenIDs
+	// Mapping from the owner (Staker) to an array of all the token IDs they've staked
 	mapping(address => uint[]) public stakedNFTs;
 
 	event NFTStaked(address indexed staker, uint tokenId, uint blockNumber);
@@ -37,6 +35,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	);
 	event StakeRewardUpdated(uint rewardPerBlock);
 
+	// Sets the smart contract addresses for the NFT & ERC20 contract, as well as the amount
+	// of rewards per block will be given to users that stake their NFTs
 	constructor(
 		IERC1155 _nftToken,
 		IERC20 _erc20Token,
@@ -49,6 +49,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
+	// Requires that only the NFT smart contract can call certain functions
 	modifier onlyNFT() {
 		require(
 			msg.sender == address(nftToken),
@@ -57,45 +58,20 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
+	// Returns the total amount of ERC20 tokens that this contract owns
 	function getStakeContractBalance() public view returns (uint) {
 		return erc20Token.balanceOf(address(this));
 	}
 
+	// Allows you to update the rewards per block amount
 	function updateStakingReward(uint _tokensPerBlock) external onlyOwner {
 		tokensPerBlock = _tokensPerBlock;
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
+	// Returns the length of the total amount an account has staked to this smart contract
 	function totalNFTsUserStaked(address account) public view returns (uint) {
 		return stakedNFTs[account].length;
-	}
-
-	function _onlyStaker(uint tokenId) private view {
-		// require that this contract has the NFT
-		require(
-			nftToken.balanceOf(address(this), tokenId) == 1,
-			"onlyStaker: Contract is not owner of this NFT"
-		);
-
-		// require that this token is staked
-		require(
-			receipt[tokenId].stakedFromBlock != 0,
-			"onlyStaker: Token is not staked"
-		);
-
-		// require that msg.sender is the owner of this nft
-		require(
-			receipt[tokenId].owner == msg.sender,
-			"onlyStaker: Caller is not NFT stake owner"
-		);
-	}
-
-	function _requireTimeElapsed(uint tokenId) private view {
-		// require that some time has elapsed (IE you can NOT stake and unstake in the same block)
-		require(
-			receipt[tokenId].stakedFromBlock < block.number,
-			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
-		);
 	}
 
 	// This contract gets called by the NFT contract when a user transfers its
@@ -120,6 +96,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// NOTE: Due to the unavoidable gas limit of the Ethereum network,
 	// a large amount of NFTs transfered could result to a failed transaction.
+	// @dev This function NEEDS to be called from the NFT smart contract. Can't
+	// be called directly or else it will fail. Allows a user to stake multiple
+	// NFTs. The Parameters are fed by the NFT contract
 	function stakeMultipleNFTs(address from, uint[] calldata tokenIds)
 		external
 		onlyNFT
@@ -141,6 +120,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked += tokenIds.length;
 	}
 
+	// This is the function a user calls when they want to unstake a single NFT.
+	// Can be called directly, does not have to be called from the NFT contract.
 	function unstakeNFT(uint tokenId) external nonReentrant {
 		_onlyStaker(tokenId);
 		_requireTimeElapsed(tokenId);
@@ -157,6 +138,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked--;
 	}
 
+	// This is the function to call when a user wants to unstake multiple NFTs.
+	// Can be called directly. The user has to pass in an array of all the NFTs
+	// they would like to unstake.
 	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](tokenIds.length);
@@ -193,6 +177,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	}
 
 	// NOTE: To only be called by a nonReentrant function.
+	// This function is meant to be called by other functions within the smart contract.
+	// Never called externally by the client.
 	function _payoutStake(uint tokenId) private {
 		Stake memory _tokenId = receipt[tokenId]; // gas saver
 
@@ -224,7 +210,8 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
-	// Function to withdraw rewards without global array
+	// This function is called when a user wants to withdraw their funds without
+	// unstaking their NFT
 	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
 		for (uint i; i < tokenIds.length; i++) {
 			uint tokenId = tokenIds[i]; // gas saver
@@ -235,5 +222,34 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			// update receipt with a new block number
 			receipt[tokenId].stakedFromBlock = block.number;
 		}
+	}
+
+	// Checks that only the person that staked the NFT can call a certain function
+	function _onlyStaker(uint tokenId) private view {
+		// require that this contract has the NFT
+		require(
+			nftToken.balanceOf(address(this), tokenId) == 1,
+			"onlyStaker: Contract is not owner of this NFT"
+		);
+
+		// require that this token is staked
+		require(
+			receipt[tokenId].stakedFromBlock != 0,
+			"onlyStaker: Token is not staked"
+		);
+
+		// require that msg.sender is the owner of this nft
+		require(
+			receipt[tokenId].owner == msg.sender,
+			"onlyStaker: Caller is not NFT stake owner"
+		);
+	}
+
+	// Requires that some time has elapsed (IE you can NOT stake and unstake in the same block)
+	function _requireTimeElapsed(uint tokenId) private view {
+		require(
+			receipt[tokenId].stakedFromBlock < block.number,
+			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
+		);
 	}
 }
