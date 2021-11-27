@@ -24,3 +24,8 @@ rewards, etc.
 
 Multiple NFTs: Same exact thing as when staking just 1 NFT except you will call the `stakeMultipleNFTs`
 function in the NFT smart contract.
+
+Unstaking:
+Single NFT: To unstake 1 NFT, you directly call the function `unstakeNFT` in the staking contract and pass in the tokenID that you'd like to unstake.
+
+Multiple NFTs: To unstake multiple NFTs, you directly call the function `unstakeMultipleNFTs` in the staking contract and pass in an array of the Token IDs you'd like to unstake.

@@ -38,12 +38,12 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// Sets the smart contract addresses for the NFT & ERC20 contract, as well as the amount
 	// of rewards per block will be given to users that stake their NFTs
 	constructor(
-		IERC1155 _nftToken,
-		IERC20 _erc20Token,
+		address _nftToken,
+		address _erc20Token,
 		uint _tokensPerBlock
 	) {
-		nftToken = _nftToken;
-		erc20Token = _erc20Token;
+		nftToken = IERC1155(_nftToken);
+		erc20Token = IERC20(_erc20Token);
 		tokensPerBlock = _tokensPerBlock;
 
 		emit StakeRewardUpdated(tokensPerBlock);
@@ -61,6 +61,16 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// Returns the total amount of ERC20 tokens that this contract owns
 	function getStakeContractBalance() public view returns (uint) {
 		return erc20Token.balanceOf(address(this));
+	}
+
+	// Allows you to set a new ERC20 contract address
+	function setERC20Contract(address _tokenAddress) public onlyOwner {
+		erc20Token = IERC20(_tokenAddress);
+	}
+
+	// Allows you to set a new NFT contract address
+	function setNFTContract(address _nftAddress) public onlyOwner {
+		nftToken = IERC1155(_nftAddress);
 	}
 
 	// Allows you to update the rewards per block amount
@@ -176,6 +186,38 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		totalNFTsStaked -= tokenIds.length;
 	}
 
+	// This function is called when a user wants to withdraw their funds without
+	// unstaking their NFT
+	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
+		for (uint i; i < tokenIds.length; i++) {
+			uint tokenId = tokenIds[i]; // gas saver
+			_onlyStaker(tokenId);
+			_requireTimeElapsed(tokenId);
+			_payoutStake(tokenId);
+
+			// update receipt with a new block number
+			receipt[tokenId].stakedFromBlock = block.number;
+		}
+	}
+
+	// Withdraws rewards from all NFTs staked without passing in an array of specific
+	// token IDs from which you want to withdraw from
+	// NOTE: Cheaper on gas to pass in the array of tokenIDs rather than not
+	// but by not passing the array in it can withdraw everything while the other can
+	// specify only the NFT rewards you'd like to withdraw from.
+	function withdrawRewardsNoArray() external nonReentrant {
+		uint[] memory _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
+		for (uint i; i < _stakedNFTs.length; i++) {
+			uint tokenId = _stakedNFTs[i];
+			_onlyStaker(tokenId);
+			_requireTimeElapsed(tokenId);
+			_payoutStake(tokenId);
+
+			// update receipt with a new block number
+			receipt[tokenId].stakedFromBlock = block.number;
+		}
+	}
+
 	// NOTE: To only be called by a nonReentrant function.
 	// This function is meant to be called by other functions within the smart contract.
 	// Never called externally by the client.
@@ -207,20 +249,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 				_tokenId.stakedFromBlock,
 				block.number
 			);
-		}
-	}
-
-	// This function is called when a user wants to withdraw their funds without
-	// unstaking their NFT
-	function withdrawRewards(uint[] calldata tokenIds) external nonReentrant {
-		for (uint i; i < tokenIds.length; i++) {
-			uint tokenId = tokenIds[i]; // gas saver
-			_onlyStaker(tokenId);
-			_requireTimeElapsed(tokenId);
-			_payoutStake(tokenId);
-
-			// update receipt with a new block number
-			receipt[tokenId].stakedFromBlock = block.number;
 		}
 	}
 

@@ -57,7 +57,7 @@ describe('Staking', function () {
 		expect(await stake.totalNFTsStaked()).to.equal(0);
 	});
 
-	xit('should stake 1 NFT', async () => {
+	it('should stake 1 NFT', async () => {
 		console.log('Gas cost: ' + (await nft.estimateGas.stakeNFT(0)).toString());
 		await nft.stakeNFT(0);
 
@@ -66,7 +66,7 @@ describe('Staking', function () {
 		expect(await stake.totalNFTsStaked()).to.equal(1);
 	});
 
-	xit('should stake multiple NFTs', async () => {
+	it('should stake multiple NFTs', async () => {
 		console.log(
 			'Gas cost: ' +
 				(await nft.estimateGas.stakeMultipleNFTs(tokenIds)).toString()
@@ -81,7 +81,7 @@ describe('Staking', function () {
 		}
 	});
 
-	xit('should unstake 1 NFT with pay', async () => {
+	it('should unstake 1 NFT with pay', async () => {
 		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
 		expect(await token.balanceOf(bob.address)).to.equal(0);
@@ -108,7 +108,7 @@ describe('Staking', function () {
 	});
 
 	// Unpaid because it was unstaked in the same block
-	xit('should unstake 1 NFT without pay', async () => {
+	it('should unstake 1 NFT without pay', async () => {
 		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
 		expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
 		expect(await token.balanceOf(bob.address)).to.equal(0);
@@ -125,7 +125,7 @@ describe('Staking', function () {
 		expect(await token.balanceOf(bob.address)).to.equal(0);
 	});
 
-	xit('should unstake multiple NFTs with pay', async () => {
+	it('should unstake multiple NFTs with pay', async () => {
 		await nft.safeBatchTransferFrom(
 			owner.address,
 			bob.address,
@@ -162,7 +162,7 @@ describe('Staking', function () {
 	});
 
 	// Lets you unstake NFTs without pay if on the same block
-	xit('should unstake multiple NFTs without pay', async () => {
+	it('should unstake multiple NFTs without pay', async () => {
 		await nft.safeBatchTransferFrom(
 			owner.address,
 			bob.address,
@@ -182,7 +182,7 @@ describe('Staking', function () {
 		expect(await token.balanceOf(bob.address)).to.equal(0);
 	});
 
-	xit('should withdraw rewards but not the NFT', async () => {
+	it('should withdraw rewards but not the NFT', async () => {
 		await nft.safeBatchTransferFrom(
 			owner.address,
 			bob.address,
@@ -253,5 +253,26 @@ describe('Staking', function () {
 
 		await stake2.unstakeMultipleNFTs(tokenIds);
 		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(0);
+	});
+
+	it('should compare gas', async () => {
+		await nft.safeBatchTransferFrom(
+			owner.address,
+			bob.address,
+			tokenIds,
+			amounts,
+			[]
+		);
+		for (let i = 0; i < 5; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
+		}
+		await nft2.stakeMultipleNFTs(tokenIds);
+		await network.provider.send('evm_mine');
+
+		console.log(
+			(await stake2.estimateGas.withdrawRewards(tokenIds)).toString()
+		);
+		console.log((await stake2.estimateGas.withdrawRewardsNoArray()).toString());
 	});
 });
