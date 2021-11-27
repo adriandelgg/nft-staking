@@ -29,3 +29,8 @@ Unstaking:
 Single NFT: To unstake 1 NFT, you directly call the function `unstakeNFT` in the staking contract and pass in the tokenID that you'd like to unstake.
 
 Multiple NFTs: To unstake multiple NFTs, you directly call the function `unstakeMultipleNFTs` in the staking contract and pass in an array of the Token IDs you'd like to unstake.
+
+Withdrawing Rewards:
+To withdraw your rewards without unstaking your NFT, you call the function `withdrawRewards` and pass in an array of tokenIDs you'd like to collect rewards from.
+
+There's also the alternative that does not require passing in an array of tokenIDs `withdrawRewardsNoArray` but passing in the array of token IDs is cheaper than calling this.
