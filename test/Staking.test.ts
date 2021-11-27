@@ -255,7 +255,7 @@ describe('Staking', function () {
 		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(0);
 	});
 
-	it('should compare gas', async () => {
+	it('should compare gas between withdrawing rewards with and without passing in an array', async () => {
 		await nft.safeBatchTransferFrom(
 			owner.address,
 			bob.address,
