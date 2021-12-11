@@ -29,8 +29,8 @@ contract NFTs is ERC1155Supply, Ownable {
 
 	function mint(
 		address account,
-		uint256 id,
-		uint256 amount,
+		uint id,
+		uint amount,
 		bytes memory data
 	) public onlyOwner {
 		_mint(account, id, amount, data);
@@ -38,8 +38,8 @@ contract NFTs is ERC1155Supply, Ownable {
 
 	function mintBatch(
 		address to,
-		uint256[] memory ids,
-		uint256[] memory amounts,
+		uint[] memory ids,
+		uint[] memory amounts,
 		bytes memory data
 	) public onlyOwner {
 		_mintBatch(to, ids, amounts, data);

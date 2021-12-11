@@ -142,7 +142,11 @@ describe('Staking', function () {
 		expect(await stake.totalNFTsStaked()).to.equal(5);
 
 		let stakedBlocks = BigNumber.from(0);
+<<<<<<< HEAD:test/Staking.test.ts
 		for (let i = 0; i < 5; i++) {
+=======
+		for (let i = 0; i < tokenIds.length; i++) {
+>>>>>>> nft-staked-array:hardhat/test/Staking.test.ts
 			// Adds up all the blocks
 			const { stakedFromBlock } = await stake.receipt(i);
 			stakedBlocks = stakedBlocks.add(stakedFromBlock);
@@ -224,4 +228,58 @@ describe('Staking', function () {
 			expect(await nft.balanceOf(stake.address, i)).to.equal(1);
 		}
 	});
+<<<<<<< HEAD:test/Staking.test.ts
+=======
+
+	it('should keep track of NFTs staked and unstaked in mapping array', async () => {
+		await nft.safeBatchTransferFrom(
+			owner.address,
+			bob.address,
+			tokenIds,
+			amounts,
+			[]
+		);
+		for (let i = 0; i < 5; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
+		}
+
+		await nft2.stakeMultipleNFTs(tokenIds);
+		expect(await stake.totalNFTsStaked()).to.equal(5);
+		for (let i = 0; i < 5; i++) {
+			expect(await stake.stakedNFTs(bob.address, i)).to.equal(i);
+		}
+		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(5);
+
+		await stake2.unstakeNFT(0);
+		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(4);
+
+		await nft2.stakeNFT(0);
+		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(5);
+
+		await stake2.unstakeMultipleNFTs(tokenIds);
+		expect(await stake.totalNFTsUserStaked(bob.address)).to.equal(0);
+	});
+
+	it('should compare gas between withdrawing rewards with and without passing in an array', async () => {
+		await nft.safeBatchTransferFrom(
+			owner.address,
+			bob.address,
+			tokenIds,
+			amounts,
+			[]
+		);
+		for (let i = 0; i < 5; i++) {
+			expect(await nft.balanceOf(bob.address, i)).to.equal(1);
+			expect(await nft.balanceOf(stake.address, i)).to.equal(0);
+		}
+		await nft2.stakeMultipleNFTs(tokenIds);
+		await network.provider.send('evm_mine');
+
+		console.log(
+			(await stake2.estimateGas.withdrawRewards(tokenIds)).toString()
+		);
+		console.log((await stake2.estimateGas.withdrawRewardsNoArray()).toString());
+	});
+>>>>>>> nft-staked-array:hardhat/test/Staking.test.ts
 });

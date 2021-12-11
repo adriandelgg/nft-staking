@@ -7,7 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+<<<<<<< HEAD:contracts/Staking.sol
 contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
+=======
+contract StakingNoArray is ERC1155Holder, ReentrancyGuard, Ownable {
+>>>>>>> nft-staked-array:hardhat/contracts/StakingNoArray.sol
 	IERC1155 public nftToken;
 	IERC20 public erc20Token;
 
