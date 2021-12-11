@@ -1,0 +1,31 @@
+MARKETPLACE - Market.sol
+
+The NFTs in this marketplace are only going to be from the contract I made.
+Price will be in ERC20 rather than Ether
+Create feature to allow new NFT contract to work with this marketplace.
+Can ONLY pay with the ERC20 token from the staking contract!
+Use Dummy ERC20 Token with 9 Decimals.
+Use Staking contract with the Array.
+
+Deployment
+- admin/owner set to deployer
+- set fee collector (address to send fees to)
+- set fee in percent (5% for example) (Ex. 5% of the sale will go to the dev)
+- Create function to change the fee dev address in the future only by the owner.
+- set ERC20 token (9 decimals)
+
+Updatable
+- whitelisted NFT addresses (allow many) (entire array so they can be removed)
+- collector
+- admin/owner
+- fee in percent (update the fee amount)
+- ERC20 token
+
+Marketplace
+- allow user to list NFT by contract address and token ID for amount in ERC20 (putting NFT up for sale)
+- safeTransferFrom NFT to/from Market contract (amount = 1, data = empty array) (putting NFT up for sale)
+- call function that shows all NFTs for sell (NFT contract address, ID, seller, price)
+- allow seller to cancel listing and get their NFT back
+- allow a user to buy an NFT for the listed price (do not let person that put up for sale buy it)
+- transfer the NFT to buyer, fee to collector, and cost minus fee to seller
+- call function to show recent NFTs sold and for how much (contract, ID, buyer, price) EVENT (last 10 or 20 maybe)
