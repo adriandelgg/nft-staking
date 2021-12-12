@@ -45,10 +45,14 @@ contract NFTs is ERC1155Supply, Ownable {
 		_mintBatch(to, ids, amounts, data);
 	}
 
+	function isNFT(uint id) public view returns (bool) {
+		return totalSupply(id) == 1;
+	}
+
 	// Transfers NFT from caller to the staking contract.
 	function stakeNFT(uint id) external {
 		// Check to make sure it's actually an NFT
-		require(totalSupply(id) == 1, "Token ID is not an NFT");
+		require(isNFT(id), "Token ID is not an NFT");
 		safeTransferFrom(msg.sender, address(stakingContract), id, 1, "");
 		stakingContract.stakeNFT(msg.sender, id);
 	}
@@ -61,7 +65,7 @@ contract NFTs is ERC1155Supply, Ownable {
 		// Array needed to pay out the NFTs
 		uint[] memory amounts = new uint[](ids.length);
 		for (uint i; i < ids.length; i++) {
-			require(totalSupply(ids[i]) == 1, "Token ID is not an NFT");
+			require(isNFT(ids[i]), "Token ID is not an NFT");
 			amounts[i] = 1;
 		}
 
@@ -74,4 +78,6 @@ contract NFTs is ERC1155Supply, Ownable {
 		);
 		stakingContract.stakeMultipleNFTs(msg.sender, ids);
 	}
+
+	function sellNFT(uint id) external {}
 }
