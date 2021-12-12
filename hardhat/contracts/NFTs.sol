@@ -10,10 +10,13 @@ interface IStaking {
 	function stakeMultipleNFTs(address from, uint[] calldata tokenIds) external;
 }
 
+interface IMarketplace {}
+
 contract NFTs is ERC1155Supply, Ownable {
 	// Here you would define your game items, like the  accessories, treats, etc.
 
 	IStaking public stakingContract;
+	IMarketplace public marketplaceContract;
 
 	constructor() ERC1155("https://ipfs.io/") {}
 
@@ -25,6 +28,10 @@ contract NFTs is ERC1155Supply, Ownable {
 	// contract needs the address of this contract on its deployement.
 	function setStakingContract(address _contract) public onlyOwner {
 		stakingContract = IStaking(_contract);
+	}
+
+	function setMarketplaceContract(address _contract) public onlyOwner {
+		marketplaceContract = IMarketplace(_contract);
 	}
 
 	function mint(
@@ -79,5 +86,9 @@ contract NFTs is ERC1155Supply, Ownable {
 		stakingContract.stakeMultipleNFTs(msg.sender, ids);
 	}
 
-	function sellNFT(uint id) external {}
+	function sellNFT(uint id, uint price) external {
+		require(isNFT(id), "Token ID is not an NFT");
+		safeTransferFrom(msg.sender, address(marketplaceContract), id, 1, "");
+		// marketplaceContract.sellNFT(msg.sender, id, price);
+	}
 }

@@ -14,6 +14,23 @@ contract Marketplace is Ownable {
 	// NFT address to bool to check if whitelisted
 	mapping(address => bool) public isWhitelisted;
 
+	// Token ID => Sale Details
+	mapping(uint => Token) name;
+
+	struct Token {
+		address nftContract;
+		address seller;
+		uint price;
+	}
+
+	event Purchased(
+		address nftContract,
+		address seller,
+		address buyer,
+		uint tokenId,
+		uint price
+	);
+
 	constructor(
 		address _feeCollector,
 		address _erc20Token,
@@ -24,8 +41,11 @@ contract Marketplace is Ownable {
 		feeAmount = _feeAmount;
 	}
 
-	modifier onlyWhitelisted(address _nft) {
-		require(isWhitelisted[_nft], "NFT contract address is not whitelisted!");
+	modifier onlyWhitelisted() {
+		require(
+			isWhitelisted[msg.sender],
+			"NFT contract address is not whitelisted!"
+		);
 		_;
 	}
 
@@ -55,6 +75,14 @@ contract Marketplace is Ownable {
 				break;
 			}
 		}
-		isWhitelisted[_nftContract] = false;
+		delete isWhitelisted[_nftContract];
 	}
+
+	function sellNFT(
+		address _seller,
+		uint _id,
+		uint _price
+	) external onlyWhitelisted {}
+
+	function purchaseNFT(uint _id) external {}
 }

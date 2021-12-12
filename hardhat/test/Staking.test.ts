@@ -12,7 +12,7 @@ import {
 	ERC20Token
 } from "../typechain-types/index";
 
-describe("Staking", function () {
+xdescribe("Staking", function () {
 	const oneEther = parseEther("1");
 	const tokenIds = [0, 1, 2, 3, 4];
 	const amounts = [1, 1, 1, 1, 1];
