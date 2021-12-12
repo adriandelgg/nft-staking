@@ -16,6 +16,12 @@ interface IMarketplace {
 		uint _id,
 		uint _price
 	) external;
+
+	function sellMultipleNFTs(
+		address _seller,
+		uint[] calldata _ids,
+		uint[] calldata _prices
+	) external;
 }
 
 contract NFTs is ERC1155Supply, Ownable {
@@ -96,5 +102,24 @@ contract NFTs is ERC1155Supply, Ownable {
 		require(isNFT(id), "Token ID is not an NFT");
 		safeTransferFrom(msg.sender, address(marketplaceContract), id, 1, "");
 		marketplaceContract.sellNFT(msg.sender, id, price);
+	}
+
+	function sellMultipleNFTs(uint[] calldata ids, uint[] calldata prices)
+		external
+	{
+		uint[] memory amounts = new uint[](ids.length);
+		for (uint i; i < ids.length; i++) {
+			require(isNFT(ids[i]), "Token ID is not an NFT");
+			amounts[i] = 1;
+		}
+
+		safeBatchTransferFrom(
+			msg.sender,
+			address(marketplaceContract),
+			ids,
+			amounts,
+			""
+		);
+		marketplaceContract.sellMultipleNFTs(msg.sender, ids, prices);
 	}
 }
