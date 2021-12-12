@@ -14,6 +14,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// A list of all the whitelisted nftContracts
 	address[] public nftContracts;
+
 	// NFT address to bool to check if whitelisted
 	mapping(address => bool) public isWhitelisted;
 
@@ -24,6 +25,15 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		address seller;
 		uint price;
 	}
+
+	event ListedForSale(
+		address nftContract,
+		address seller,
+		uint tokenId,
+		uint price
+	);
+
+	event CancelledSale(address nftContract, address seller, uint tokenId);
 
 	event Purchased(
 		address nftContract,
@@ -51,14 +61,6 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
-	modifier onlyERC20() {
-		require(
-			msg.sender == address(erc20Token),
-			"Only the ERC20 contract can call this function!"
-		);
-		_;
-	}
-
 	function setFeeCollector(address _collector) external onlyOwner {
 		feeCollector = _collector;
 	}
@@ -71,12 +73,21 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		erc20Token = IERC20(_token);
 	}
 
-	function whitelistNFT(address _nftContract) external onlyOwner {
+	function whitelistNFTContract(address _nftContract) external onlyOwner {
 		nftContracts.push(_nftContract);
 		isWhitelisted[_nftContract] = true;
 	}
 
-	function unwhitelistNFT(address _nftContract) external onlyOwner {
+	function calculateFee(uint _price)
+		public
+		view
+		returns (uint fee, uint toSeller)
+	{
+		fee = (_price * feeAmount) / 100;
+		toSeller = _price - fee;
+	}
+
+	function unwhitelistNFTContract(address _nftContract) external onlyOwner {
 		address[] memory _nftContracts = nftContracts; // gas saver
 		for (uint i; i < _nftContracts.length; i++) {
 			if (_nftContracts[i] == _nftContract) {
@@ -98,8 +109,10 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 			"Token Transfer Failed"
 		);
 		tokensForSale[msg.sender][_id] = Token(_seller, _price);
+		emit ListedForSale(msg.sender, _seller, _id, _price);
 	}
 
+	//TODO: Check gas with and without using the "gas saver" line.
 	function sellMultipleNFTs(
 		address _seller,
 		uint[] calldata _ids,
@@ -114,23 +127,28 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 				"Token Transfer Failed"
 			);
 			tokensForSale[msg.sender][id] = Token(_seller, _prices[i]);
+			emit ListedForSale(msg.sender, _seller, id, _prices[i]);
 		}
 	}
 
-	function cancelNFTSale(address _contract, uint _id) external {
+	function cancelNFTSale(address _contract, uint _id) external nonReentrant {
 		// Check that only the owner can unlist their own NFT
 		require(
 			msg.sender == tokensForSale[_contract][_id].seller,
 			"You are not the NFT seller."
 		);
-		// Make sure the contract has the NFT still
+
+		// Transfer fails if contract doesn't have the NFT
 		IERC1155(_contract).safeTransferFrom(address(this), msg.sender, _id, 1, "");
 		delete tokensForSale[_contract][_id];
+
+		emit CancelledSale(_contract, msg.sender, _id);
 	}
 
 	// Can only cancel multiple NFTs sold from 1 contract
 	function cancelMultipleNFTSales(address _contract, uint[] calldata _ids)
 		external
+		nonReentrant
 	{
 		IERC1155 nftContract = IERC1155(_contract);
 
@@ -141,15 +159,26 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 				"You are not the NFT seller."
 			);
 
-			// Make sure the contract has the NFT still
+			// Transfer fails if contract doesn't have the NFT
 			nftContract.safeTransferFrom(address(this), msg.sender, id, 1, "");
 			delete tokensForSale[_contract][id];
+
+			emit CancelledSale(_contract, msg.sender, id);
 		}
 	}
 
-	function purchaseNFT(uint _id) external nonReentrant onlyERC20 {
+	function purchaseNFT(address _contract, uint _id) external nonReentrant {
 		// 1. User will first have to approve their ERC20 tokens to this address.
-		// If it's a custom ERC20, you can do the same method as the NFT contract where
-		// the ERC20 contract calls this function and transfers the token directly to it all in 1 tx
+		// 2. Once approved we will set the amount to trade as the NFT price.
+		// 3. Split payment and do 2 send transactions.
+		Token memory token = tokensForSale[_contract][_id]; // gas saver
+
+		(uint toSeller, uint fee) = calculateFee(token.price);
+
+		erc20Token.transferFrom(msg.sender, token.seller, toSeller);
+		erc20Token.transferFrom(msg.sender, feeCollector, fee);
+		IERC1155(_contract).safeTransferFrom(address(this), msg.sender, _id, 1, "");
+
+		emit Purchased(_contract, token.seller, msg.sender, _id, token.price);
 	}
 }
