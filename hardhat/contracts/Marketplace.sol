@@ -14,8 +14,8 @@ contract Marketplace is Ownable {
 	// NFT address to bool to check if whitelisted
 	mapping(address => bool) public isWhitelisted;
 
-	// Token ID => Sale Details
-	mapping(uint => Token) name;
+	// Token ID => Token Sale Details
+	mapping(uint => Token) public tokensForSale;
 
 	struct Token {
 		address nftContract;
@@ -82,7 +82,9 @@ contract Marketplace is Ownable {
 		address _seller,
 		uint _id,
 		uint _price
-	) external onlyWhitelisted {}
+	) external onlyWhitelisted {
+		tokensForSale[_id] = Token(msg.sender, _seller, _price);
+	}
 
 	function purchaseNFT(uint _id) external {}
 }

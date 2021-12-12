@@ -37,4 +37,18 @@ describe("Marketplace", function () {
 		market = await MarketFactory.deploy(chad.address, token.address, 5);
 		market2 = market.connect(bob);
 	});
+
+	it("should setERC20Token", async () => {});
+
+	it("should setFeeAmount", async () => {});
+
+	it("should setFeeCollector", async () => {});
+
+	it("should unwhitelistNFT", async () => {});
+
+	it("should whitelistNFT", async () => {});
+
+	it("should list NFT for sale", async () => {});
+
+	it("should purchase NFT", async () => {});
 });

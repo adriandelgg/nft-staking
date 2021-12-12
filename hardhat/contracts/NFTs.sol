@@ -10,7 +10,13 @@ interface IStaking {
 	function stakeMultipleNFTs(address from, uint[] calldata tokenIds) external;
 }
 
-interface IMarketplace {}
+interface IMarketplace {
+	function sellNFT(
+		address _seller,
+		uint _id,
+		uint _price
+	) external;
+}
 
 contract NFTs is ERC1155Supply, Ownable {
 	// Here you would define your game items, like the  accessories, treats, etc.
@@ -89,6 +95,6 @@ contract NFTs is ERC1155Supply, Ownable {
 	function sellNFT(uint id, uint price) external {
 		require(isNFT(id), "Token ID is not an NFT");
 		safeTransferFrom(msg.sender, address(marketplaceContract), id, 1, "");
-		// marketplaceContract.sellNFT(msg.sender, id, price);
+		marketplaceContract.sellNFT(msg.sender, id, price);
 	}
 }
