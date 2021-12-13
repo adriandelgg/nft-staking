@@ -172,6 +172,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		// 2. Once approved we will set the amount to trade as the NFT price.
 		// 3. Split payment and do 2 send transactions.
 		Token memory token = tokensForSale[_contract][_id]; // gas saver
+		require(token.seller != msg.sender, "You can NOT buy your own NFT");
 
 		(uint toSeller, uint fee) = calculateFee(token.price);
 
