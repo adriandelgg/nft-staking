@@ -13,6 +13,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	uint public feeAmount;
 
 	// A list of all the whitelisted nftContracts
+	// ! Not necessarily needed & mapping would work just fine!
 	address[] public nftContracts;
 
 	// NFT address to bool to check if whitelisted
@@ -175,15 +176,15 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
+	///@notice User will first have to approve their ERC20 tokens to this address.
 	function purchaseNFT(address _contract, uint _id) external nonReentrant {
-		///@note User will first have to approve their ERC20 tokens to this address.
-		// 2. Once approved we will set the amount to trade as the NFT price.
-		// 3. Split payment and do 2 send transactions.
 		Token memory token = tokensForSale[_contract][_id]; // gas saver
 		require(token.seller != msg.sender, "You can NOT buy your own NFT");
 
+		// Calculates the fee to pay to feeCollector & seller
 		(uint fee, uint toSeller) = calculateFee(token.price);
 
+		// Transfers ERC20 & NFT
 		erc20Token.transferFrom(msg.sender, feeCollector, fee);
 		erc20Token.transferFrom(msg.sender, token.seller, toSeller);
 		IERC1155(_contract).safeTransferFrom(address(this), msg.sender, _id, 1, "");

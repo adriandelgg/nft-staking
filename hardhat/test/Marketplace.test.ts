@@ -250,8 +250,16 @@ describe("Marketplace", function () {
 			expect(await nft.balanceOf(bob.address, 0)).to.equal(0);
 			await token2.approve(market.address, await token2.totalSupply());
 
+			console.log(
+				"Gas cost: " +
+					(await market2.estimateGas.purchaseNFT(nft.address, 0)).toString()
+			);
 			await market2.purchaseNFT(nft.address, 0);
 			expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
+
+			const { seller, price } = await market.tokensForSale(nft.address, 0);
+			expect(seller).to.equal(zeroAddress);
+			expect(price).to.equal(0);
 
 			// Checks that address received fee
 			expect(await token.balanceOf(chad.address)).to.equal(
