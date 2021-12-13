@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { parseEther } from "ethers/lib/utils";
 import {
@@ -52,7 +52,7 @@ describe("Marketplace", function () {
 	});
 
 	describe("Setting Values", () => {
-		xit("should setFeeCollector", async () => {
+		it("should setFeeCollector", async () => {
 			expect(await market.feeCollector()).to.equal(chad.address);
 
 			console.log(
@@ -64,7 +64,7 @@ describe("Marketplace", function () {
 			expect(await market.feeCollector()).to.equal(owner.address);
 		});
 
-		xit("should setERC20Token", async () => {
+		it("should setERC20Token", async () => {
 			expect(await market.erc20Token()).to.equal(token.address);
 
 			console.log(
@@ -76,7 +76,7 @@ describe("Marketplace", function () {
 			expect(await market.erc20Token()).to.equal(owner.address);
 		});
 
-		xit("should setFeeAmount", async () => {
+		it("should setFeeAmount", async () => {
 			expect(await market.feeAmount()).to.equal(5);
 
 			console.log(
@@ -87,7 +87,7 @@ describe("Marketplace", function () {
 			expect(await market.feeAmount()).to.equal(10);
 		});
 
-		xit("should whitelistNFT", async () => {
+		it("should whitelistNFT", async () => {
 			expect(await market.totalNFTContracts()).to.equal(0);
 			expect(await market.isWhitelisted(nft.address)).to.equal(false);
 
@@ -103,7 +103,7 @@ describe("Marketplace", function () {
 			expect(await market.isWhitelisted(nft.address)).to.equal(true);
 		});
 
-		xit("should unwhitelistNFT", async () => {
+		it("should unwhitelistNFT", async () => {
 			expect(await market.totalNFTContracts()).to.equal(0);
 			expect(await market.isWhitelisted(nft.address)).to.equal(false);
 
@@ -135,7 +135,7 @@ describe("Marketplace", function () {
 			expect(await market.isWhitelisted(nft.address)).to.equal(true);
 		});
 
-		xit("should list NFT for sale", async () => {
+		it("should list NFT for sale", async () => {
 			console.log(
 				"Gas cost: " + (await nft.estimateGas.sellNFT(0, 1e5)).toString()
 			);
@@ -153,7 +153,7 @@ describe("Marketplace", function () {
 			expect(price).to.equal(1e5);
 		});
 
-		xit("should sellMultipleNFTs", async () => {
+		it("should sellMultipleNFTs", async () => {
 			console.log(
 				"Gas cost: " +
 					(await nft.estimateGas.sellMultipleNFTs(tokenIds, prices)).toString()
@@ -173,7 +173,7 @@ describe("Marketplace", function () {
 			}
 		});
 
-		xit("should cancelNFTSale", async () => {
+		it("should cancelNFTSale", async () => {
 			await nft.sellNFT(0, 1e5);
 			expect(await nft.balanceOf(owner.address, 0)).to.equal(0);
 			expect(await nft.balanceOf(market.address, 0)).to.equal(1);
@@ -196,7 +196,7 @@ describe("Marketplace", function () {
 			expect(price).to.equal(0);
 		});
 
-		xit("should cancelMultipleNFTSales", async () => {
+		it("should cancelMultipleNFTSales", async () => {
 			await nft.sellMultipleNFTs(tokenIds, prices);
 
 			for (let i = 0; i < tokenIds.length; i++) {
