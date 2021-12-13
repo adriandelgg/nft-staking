@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { parseEther } from "ethers/lib/utils";
 import {
@@ -236,7 +236,8 @@ describe("Marketplace", function () {
 		});
 
 		it("should purchaseNFT", async () => {
-			await nft.sellNFT(0, 1e5);
+			const salePrice = 1e5;
+			await nft.sellNFT(0, salePrice);
 			expect(await nft.balanceOf(owner.address, 0)).to.equal(0);
 			expect(await nft.balanceOf(market.address, 0)).to.equal(1);
 
@@ -244,9 +245,18 @@ describe("Marketplace", function () {
 				"You can NOT buy your own NFT"
 			);
 
+			expect(await token.balanceOf(chad.address)).to.equal(0);
+
 			expect(await nft.balanceOf(bob.address, 0)).to.equal(0);
+			await token2.approve(market.address, await token2.totalSupply());
+
 			await market2.purchaseNFT(nft.address, 0);
 			expect(await nft.balanceOf(bob.address, 0)).to.equal(1);
+
+			// Checks that address received fee
+			expect(await token.balanceOf(chad.address)).to.equal(
+				(await market.feeAmount()).mul(salePrice).div(100)
+			);
 		});
 	});
 });

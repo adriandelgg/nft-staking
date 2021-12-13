@@ -182,10 +182,10 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		Token memory token = tokensForSale[_contract][_id]; // gas saver
 		require(token.seller != msg.sender, "You can NOT buy your own NFT");
 
-		(uint toSeller, uint fee) = calculateFee(token.price);
+		(uint fee, uint toSeller) = calculateFee(token.price);
 
-		erc20Token.transferFrom(msg.sender, token.seller, toSeller);
 		erc20Token.transferFrom(msg.sender, feeCollector, fee);
+		erc20Token.transferFrom(msg.sender, token.seller, toSeller);
 		IERC1155(_contract).safeTransferFrom(address(this), msg.sender, _id, 1, "");
 
 		delete tokensForSale[_contract][_id];
