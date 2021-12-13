@@ -44,12 +44,12 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	);
 
 	constructor(
-		address _feeCollector,
 		address _erc20Token,
+		address _feeCollector,
 		uint _feeAmount
 	) {
-		feeCollector = _feeCollector;
 		erc20Token = IERC20(_erc20Token);
+		feeCollector = _feeCollector;
 		feeAmount = _feeAmount;
 	}
 
@@ -59,6 +59,10 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 			"NFT contract address is not whitelisted!"
 		);
 		_;
+	}
+
+	function totalNFTContracts() public view returns (uint) {
+		return nftContracts.length;
 	}
 
 	function setFeeCollector(address _collector) external onlyOwner {
@@ -119,15 +123,20 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		uint[] calldata _prices
 	) external onlyNFT {
 		IERC1155 nftContract = IERC1155(msg.sender);
+
 		for (uint i; i < _ids.length; i++) {
 			uint id = _ids[i]; // gas saver
+			uint price = _prices[i]; // gas saver
+
 			// Checks to make sure this contract received the NFTs.
 			require(
 				nftContract.balanceOf(address(this), id) == 1,
 				"Token Transfer Failed"
 			);
-			tokensForSale[msg.sender][id] = Token(_seller, _prices[i]);
-			emit ListedForSale(msg.sender, _seller, id, _prices[i]);
+
+			tokensForSale[msg.sender][id] = Token(_seller, price);
+
+			emit ListedForSale(msg.sender, _seller, id, price);
 		}
 	}
 
