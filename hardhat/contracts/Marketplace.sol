@@ -116,7 +116,6 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit ListedForSale(msg.sender, _seller, _id, _price);
 	}
 
-	//TODO: Check gas with and without using the "gas saver" line.
 	function sellMultipleNFTs(
 		address _seller,
 		uint[] calldata _ids,
@@ -177,7 +176,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	}
 
 	function purchaseNFT(address _contract, uint _id) external nonReentrant {
-		// 1. User will first have to approve their ERC20 tokens to this address.
+		///@note User will first have to approve their ERC20 tokens to this address.
 		// 2. Once approved we will set the amount to trade as the NFT price.
 		// 3. Split payment and do 2 send transactions.
 		Token memory token = tokensForSale[_contract][_id]; // gas saver
