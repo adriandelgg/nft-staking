@@ -180,6 +180,8 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		erc20Token.transferFrom(msg.sender, feeCollector, fee);
 		IERC1155(_contract).safeTransferFrom(address(this), msg.sender, _id, 1, "");
 
+		delete tokensForSale[_contract][_id];
+
 		emit Purchased(_contract, token.seller, msg.sender, _id, token.price);
 	}
 }
