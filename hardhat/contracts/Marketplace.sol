@@ -54,6 +54,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		feeAmount = _feeAmount;
 	}
 
+	// Checks that only whitelisted NFT contracts can call a function.
 	modifier onlyNFT() {
 		require(
 			isWhitelisted[msg.sender],
@@ -66,10 +67,17 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		return nftContracts.length;
 	}
 
+	// Returns an array of all the whitelisted NFT contracts.
+	function getNFTContracts() public view returns (address[] memory) {
+		return nftContracts;
+	}
+
+	// Sets who the fees go to.
 	function setFeeCollector(address _collector) external onlyOwner {
 		feeCollector = _collector;
 	}
 
+	// Sets the fee % amount that goes to the fee collector.
 	function setFeeAmount(uint _amount) external onlyOwner {
 		feeAmount = _amount;
 	}
@@ -83,6 +91,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		isWhitelisted[_nftContract] = true;
 	}
 
+	// Calculates the fee that goes to the collector, and the amount a seller earns.
 	function calculateFee(uint _price)
 		public
 		view

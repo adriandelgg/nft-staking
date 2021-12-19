@@ -24,6 +24,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// Mapping from the owner (Staker) to an array of all the token IDs they've staked
 	mapping(address => uint[]) public stakedNFTs;
 
+	// added
+	mapping(address => uint) public ownerToken;
+
 	event NFTStaked(address indexed staker, uint tokenId, uint blockNumber);
 	event NFTUnStaked(address indexed staker, uint tokenId, uint blockNumber);
 	event StakePayout(
@@ -58,6 +61,11 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
+	// Returns the total amount of ERC20 tokens that this contract owns
+	function getStakeContractBalance() public view returns (uint) {
+		return erc20Token.balanceOf(address(this));
+	}
+
 	// Allows you to set a new ERC20 contract address
 	function setERC20Contract(address _tokenAddress) public onlyOwner {
 		erc20Token = IERC20(_tokenAddress);
@@ -74,11 +82,6 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit StakeRewardUpdated(tokensPerBlock);
 	}
 
-	// Returns the total amount of ERC20 tokens that this contract owns
-	function getStakeContractBalance() public view returns (uint) {
-		return erc20Token.balanceOf(address(this));
-	}
-
 	// Returns the length of the total amount an account has staked to this smart contract
 	function totalNFTsUserStaked(address account) public view returns (uint) {
 		return stakedNFTs[account].length;
@@ -93,6 +96,11 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		return stakedNFTs[account];
 	}
 
+	// added
+	function getOwnerToken(address account) public view returns (uint) {
+		return ownerToken[account];
+	}
+
 	// This contract gets called by the NFT contract when a user transfers its
 	// NFT to it. It will only allow the NFT contract to call it and will log their
 	// address and info to properly pay them out.
@@ -104,10 +112,12 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			nftToken.balanceOf(address(this), tokenId) == 1,
 			"Stake: Token Transfer Failed"
 		);
+		require(ownerToken[from] == 0, "Stake: Only one NFT allowed during beta");
 
 		receipt[tokenId].owner = from;
 		receipt[tokenId].stakedFromBlock = block.number;
 		stakedNFTs[from].push(tokenId);
+		ownerToken[from] = tokenId;
 		totalNFTsStaked++;
 
 		emit NFTStaked(from, tokenId, block.number);
@@ -118,26 +128,26 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	// @dev This function NEEDS to be called from the NFT smart contract. Can't
 	// be called directly or else it will fail. Allows a user to stake multiple
 	// NFTs. The Parameters are fed by the NFT contract
-	function stakeMultipleNFTs(address from, uint[] calldata tokenIds)
-		external
-		onlyNFT
-	{
-		for (uint i; i < tokenIds.length; i++) {
-			uint tokenId = tokenIds[i]; // gas saver
-			// Checks to make sure this contract received the NFT.
-			require(
-				nftToken.balanceOf(address(this), tokenId) == 1,
-				"Stake: Token Transfer Failed"
-			);
+	// function stakeMultipleNFTs(address from, uint[] calldata tokenIds)
+	// 	external
+	// 	onlyNFT
+	// {
+	// 	for (uint i; i < tokenIds.length; i++) {
+	// 		uint tokenId = tokenIds[i]; // gas saver
+	// 		// Checks to make sure this contract received the NFT.
+	// 		require(
+	// 			nftToken.balanceOf(address(this), tokenId) == 1,
+	// 			"Stake: Token Transfer Failed"
+	// 		);
 
-			receipt[tokenId].owner = from;
-			receipt[tokenId].stakedFromBlock = block.number;
-			stakedNFTs[from].push(tokenId);
+	// 		receipt[tokenId].owner = from;
+	// 		receipt[tokenId].stakedFromBlock = block.number;
+	// 		stakedNFTs[from].push(tokenId);
 
-			emit NFTStaked(from, tokenId, block.number);
-		}
-		totalNFTsStaked += tokenIds.length;
-	}
+	// 		emit NFTStaked(from, tokenId, block.number);
+	// 	}
+	// 	totalNFTsStaked += tokenIds.length;
+	// }
 
 	// This is the function a user calls when they want to unstake a single NFT.
 	// Can be called directly, does not have to be called from the NFT contract.
@@ -154,46 +164,48 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			}
 		}
 		nftToken.safeTransferFrom(address(this), msg.sender, tokenId, 1, "");
+		receipt[tokenId].stakedFromBlock = 0;
+		ownerToken[msg.sender] = 0;
 		totalNFTsStaked--;
 	}
 
 	// This is the function to call when a user wants to unstake multiple NFTs.
 	// Can be called directly. The user has to pass in an array of all the NFTs
 	// they would like to unstake.
-	function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
-		// Array needed to pay out the NFTs
-		uint[] memory amounts = new uint[](tokenIds.length);
-		uint[] storage _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
+	// function unstakeMultipleNFTs(uint[] calldata tokenIds) external nonReentrant {
+	// 	// Array needed to pay out the NFTs
+	// 	uint[] memory amounts = new uint[](tokenIds.length);
+	// 	uint[] storage _stakedNFTs = stakedNFTs[msg.sender]; // gas saver
 
-		for (uint i; i < tokenIds.length; i++) {
-			uint id = tokenIds[i]; // gas saver
+	// 	for (uint i; i < tokenIds.length; i++) {
+	// 		uint id = tokenIds[i]; // gas saver
 
-			_onlyStaker(id);
-			_requireTimeElapsed(id);
-			_payoutStake(id);
-			amounts[i] = 1;
+	// 		_onlyStaker(id);
+	// 		_requireTimeElapsed(id);
+	// 		_payoutStake(id);
+	// 		amounts[i] = 1;
 
-			// Finds the ID in the array and removes it.
-			for (uint x; x < _stakedNFTs.length; x++) {
-				if (id == _stakedNFTs[x]) {
-					_stakedNFTs[x] = _stakedNFTs[_stakedNFTs.length - 1];
-					_stakedNFTs.pop();
-					break;
-				}
-			}
+	// 		// Finds the ID in the array and removes it.
+	// 		for (uint x; x < _stakedNFTs.length; x++) {
+	// 			if (id == _stakedNFTs[x]) {
+	// 				_stakedNFTs[x] = _stakedNFTs[_stakedNFTs.length - 1];
+	// 				_stakedNFTs.pop();
+	// 				break;
+	// 			}
+	// 		}
 
-			emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
-		}
+	// 		emit NFTUnStaked(msg.sender, id, receipt[id].stakedFromBlock);
+	// 	}
 
-		nftToken.safeBatchTransferFrom(
-			address(this),
-			msg.sender,
-			tokenIds,
-			amounts,
-			""
-		);
-		totalNFTsStaked -= tokenIds.length;
-	}
+	// 	nftToken.safeBatchTransferFrom(
+	// 		address(this),
+	// 		msg.sender,
+	// 		tokenIds,
+	// 		amounts,
+	// 		""
+	// 	);
+	// 	totalNFTsStaked -= tokenIds.length;
+	// }
 
 	// This function is called when a user wants to withdraw their funds without
 	// unstaking their NFT
@@ -288,5 +300,21 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 			receipt[tokenId].stakedFromBlock < block.number,
 			"requireTimeElapsed: Can not stake/unStake/harvest in same block"
 		);
+	}
+
+	// added
+	function _getTimeStaked(uint tokenId) internal view returns (uint) {
+		if (receipt[tokenId].stakedFromBlock == 0) {
+			return 0;
+		}
+		return receipt[tokenId].stakedFromBlock - block.number;
+	}
+
+	// added
+	function getCurrentStakeEarned(uint tokenId) public view returns (uint) {
+		if (receipt[tokenId].stakedFromBlock == 0) {
+			return 0;
+		}
+		return (block.number - _getTimeStaked(tokenId)) * tokensPerBlock;
 	}
 }
