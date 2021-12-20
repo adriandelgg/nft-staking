@@ -98,6 +98,9 @@ describe("Marketplace", function () {
 					).toString()
 			);
 			await market.whitelistNFTContract(nft.address);
+			await expect(market.whitelistNFTContract(nft.address)).to.be.revertedWith(
+				"NFT contract is already whitelisted"
+			);
 
 			expect(await market.totalNFTContracts()).to.equal(1);
 			expect(await market.isWhitelisted(nft.address)).to.equal(true);

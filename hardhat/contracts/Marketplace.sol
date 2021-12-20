@@ -10,6 +10,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	IERC20 public erc20Token;
 	address public feeCollector;
+
+	// When setting the fee amount, you must make the percentage as a whole number.
+	// E.G: 5% = 5, 10% = 10, 50% = 50, etc.
 	uint public feeAmount;
 
 	// A list of all the whitelisted nftContracts
@@ -20,6 +23,8 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	mapping(address => bool) public isWhitelisted;
 
 	// NFT Contract Address => Token ID => Token Sale Details
+	// To use it, you give it an NFT contract address, then the Token ID,
+	// and this will give you the seller & price.
 	mapping(address => mapping(uint => Token)) public tokensForSale;
 
 	struct Token {
@@ -63,6 +68,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
+	// This returns the length amount of NFT contracts in the array.
 	function totalNFTContracts() public view returns (uint) {
 		return nftContracts.length;
 	}
@@ -78,15 +84,23 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	}
 
 	// Sets the fee % amount that goes to the fee collector.
+	// NOTE: Must be added as a whole number.
+	// Ex: 5 = 5%, 50 = 50%, 10 = 10%
 	function setFeeAmount(uint _amount) external onlyOwner {
 		feeAmount = _amount;
 	}
 
+	// If you change the ERC20 token, you can use this function to set the new token address.
 	function setERC20Token(address _token) external onlyOwner {
 		erc20Token = IERC20(_token);
 	}
 
+	// Whitelists an NFT address so that it can be used with this marketplace
 	function whitelistNFTContract(address _nftContract) external onlyOwner {
+		require(
+			!isWhitelisted[_nftContract],
+			"NFT contract is already whitelisted"
+		);
 		nftContracts.push(_nftContract);
 		isWhitelisted[_nftContract] = true;
 	}
@@ -101,6 +115,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		toSeller = _price - fee;
 	}
 
+	// Removes a whitelisted NFT contract
 	function unwhitelistNFTContract(address _nftContract) external onlyOwner {
 		address[] memory _nftContracts = nftContracts; // gas saver
 		for (uint i; i < _nftContracts.length; i++) {

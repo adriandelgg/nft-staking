@@ -5,27 +5,31 @@ Price will be in ERC20 rather than Ether
 Create feature to allow new NFT contract to work with this marketplace.
 Can ONLY pay with the ERC20 token from the staking contract!
 Use Dummy ERC20 Token with 9 Decimals.
-Use Staking contract with the Array.
+Use Staking contract with the Array as reference.
 
 Deployment
-- admin/owner set to deployer
-- set fee collector (address to send fees to)
-- set fee in percent (5% for example) (Ex. 5% of the sale will go to the dev)
-- Create function to change the fee dev address in the future only by the owner.
-- set ERC20 token (9 decimals)
+- X admin/owner set to deployer
+- X set fee collector (address to send fees to)
+- X set fee in percent (5% for example) (Ex. 5% of the sale will go to the dev)
+- X Create function to change the fee dev address in the future only by the owner.
+- X set ERC20 token (9 decimals)
+- ! Create array that stores the NFT contract addresses that are allowed to trade with the contract
+	- The array is not necessarily needed and could be added to a backend.
 
 Updatable
-- whitelisted NFT addresses (allow many) (entire array so they can be removed)
-- collector
-- admin/owner
-- fee in percent (update the fee amount)
-- ERC20 token
+- X whitelisted NFT addresses (allow many) (entire array so they can be removed)
+- X collector
+- X admin/owner
+- X fee in percent (update the fee amount)
+- X ERC20 token
 
 Marketplace
-- allow user to list NFT by contract address and token ID for amount in ERC20 (putting NFT up for sale)
-- safeTransferFrom NFT to/from Market contract (amount = 1, data = empty array) (putting NFT up for sale)
-- call function that shows all NFTs for sell (NFT contract address, ID, seller, price)
-- allow seller to cancel listing and get their NFT back
-- allow a user to buy an NFT for the listed price (do not let person that put up for sale buy it)
-- transfer the NFT to buyer, fee to collector, and cost minus fee to seller
-- call function to show recent NFTs sold and for how much (contract, ID, buyer, price) EVENT (last 10 or 20 maybe)
+- X allow user to list NFT by contract address and token ID for amount in ERC20 (putting NFT up for sale)
+- X safeTransferFrom NFT to/from Market contract (amount = 1, data = empty array) (putting NFT up for sale)
+- ! call function that shows all NFTs for sell (NFT contract address, ID, seller, price)
+	- Store this in a Database by catching the events
+	- Can be checked by calling tokensForSale
+- X allow seller to cancel listing and get their NFT back
+- X allow a user to buy an NFT for the listed price (do not let person that put up for sale buy it)
+- X transfer the NFT to buyer, fee to collector, and cost minus fee to seller
+- X call function to show recent NFTs sold and for how much (contract, ID, buyer, price) EVENT (last 10 or 20 maybe)
