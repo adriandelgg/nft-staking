@@ -30,13 +30,8 @@ call methods
 - X erc20 balance of the contract
 - X reward token per block
 - X total NFTs staked by all users
-<<<<<<< HEAD
-- ! how many NFTs the user has staked
-- ! Which NFTs the user has staked by ID (array usable by front end to withdraw/claim reward)
-=======
 - X how many NFTs the user has staked
 - x Which NFTs the user has staked by ID (array usable by front end to withdraw/claim reward)
->>>>>>> nft-staked-array
    ! NOTE: (Highly do NOT advise due to extremely high gas costs and is unnecessary. This will provide a bad user experience due to the
    user having to pay more gas, thus making your app more expensive to use!!
    I recommend storing these values in an off-chain database, or having the user simply remember which NFTs they've staked.

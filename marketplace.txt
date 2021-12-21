@@ -10,11 +10,16 @@ Use Staking contract with the Array as reference.
 Deployment
 - X admin/owner set to deployer
 - X set fee collector (address to send fees to)
-- X set fee in percent (5% for example) (Ex. 5% of the sale will go to the dev)
+- ! set fee in percent (5% for example) (Ex. 5% of the sale will go to the dev)
+	- I recommend to keep the percent in whole numbers.
+	- Ex: 5% = 5, don't do .9%
+	- Did you want the fee to always be the same thing? For example be 5% & never change it again?
+	- Doing so saves gas & adds confidence that you won't later change the fee to something a lot higher
+	  in the future while a user has their NFT for sale.
 - X Create function to change the fee dev address in the future only by the owner.
 - X set ERC20 token (9 decimals)
 - ! Create array that stores the NFT contract addresses that are allowed to trade with the contract
-	- The array is not necessarily needed and could be added to a backend.
+	- The array is not necessarily needed and could be added to a backend to reduce gas cost.
 
 Updatable
 - X whitelisted NFT addresses (allow many) (entire array so they can be removed)
