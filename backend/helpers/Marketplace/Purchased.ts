@@ -13,7 +13,7 @@ export async function purchased(
 	price = String(price);
 	try {
 		// 1. Find tokenId & nftContract in the DB
-		await Listing.findOneAndDelete({ nftContract, tokenId });
+		await Listing.findOneAndDelete({ nftContract, seller, tokenId });
 		// 2. If it doesn't exist return
 		// 3. If it does remove it from the database
 		// 4. Add to another Model in DB all the purchased & sold NFTs a user has done.

@@ -7,7 +7,6 @@
 	},
 	"dependencies": {
 		"@openzeppelin/contracts": "^4.3.2",
-		"@openzeppelin/contracts6": "npm:@openzeppelin/contracts@^3.4.0",
 		"dotenv": "^10.0.0"
 	},
 	"devDependencies": {

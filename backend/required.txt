@@ -5,8 +5,10 @@ Return token IDs for owner ERC1155
 Get all NFTs a user owns
 
 MARKETPLACE
-Display all for sale
-Display sold (time stamp or recent to help sort by recent if possible)
+- Display all for sale
+- Display sold (time stamp or recent to help sort by recent if possible)
+  - Use event filtering because this will cost a lot in the DB & redundant.
+- All whitelisted NFT contracts
 
 PERSONAL PAGE
 Display for sale by owner
@@ -17,3 +19,5 @@ Collection
 Owner
 Price
 
+Staking
+-All NFTs a user has staked

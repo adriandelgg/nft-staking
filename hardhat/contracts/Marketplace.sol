@@ -48,7 +48,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	event Purchased(
 		address indexed nftContract,
 		address indexed seller,
-		address buyer,
+		address indexed buyer,
 		uint tokenId,
 		uint price
 	);
