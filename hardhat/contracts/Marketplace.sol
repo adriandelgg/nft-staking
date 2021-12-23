@@ -33,17 +33,21 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	}
 
 	event ListedForSale(
-		address nftContract,
-		address seller,
+		address indexed nftContract,
+		address indexed seller,
 		uint tokenId,
 		uint price
 	);
 
-	event CancelledSale(address nftContract, address seller, uint tokenId);
+	event CancelledSale(
+		address indexed nftContract,
+		address indexed seller,
+		uint tokenId
+	);
 
 	event Purchased(
-		address nftContract,
-		address seller,
+		address indexed nftContract,
+		address indexed seller,
 		address buyer,
 		uint tokenId,
 		uint price
@@ -128,6 +132,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		delete isWhitelisted[_nftContract];
 	}
 
+	// Can only be called by the whitelisted NFT contract
 	function sellNFT(
 		address _seller,
 		uint _id,
@@ -141,6 +146,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		emit ListedForSale(msg.sender, _seller, _id, _price);
 	}
 
+	// Can only be called by the whitelisted NFT contract
 	function sellMultipleNFTs(
 		address _seller,
 		uint[] calldata _ids,
@@ -164,6 +170,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		}
 	}
 
+	// Must pass in the contract's address to differentiant between other token IDs
 	function cancelNFTSale(address _contract, uint _id) external nonReentrant {
 		// Check that only the owner can unlist their own NFT
 		require(
