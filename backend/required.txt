@@ -1,0 +1,19 @@
+NFTs
+Return token IDs for owner ERC721
+Return token IDs for owner ERC1155
+
+Get all NFTs a user owns
+
+MARKETPLACE
+Display all for sale
+Display sold (time stamp or recent to help sort by recent if possible)
+
+PERSONAL PAGE
+Display for sale by owner
+Display recently sold by owner
+
+All returns should have sortable data like:
+Collection
+Owner
+Price
+
