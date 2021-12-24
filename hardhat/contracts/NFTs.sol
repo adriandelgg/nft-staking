@@ -30,7 +30,12 @@ contract NFTs is ERC1155Supply, Ownable {
 	IStaking public stakingContract;
 	IMarketplace public marketplaceContract;
 
-	constructor() ERC1155("https://ipfs.io/") {}
+	constructor(address _stakingContract, address _marketplaceContract)
+		ERC1155("https://ipfs.io/")
+	{
+		stakingContract = IStaking(_stakingContract);
+		marketplaceContract = IMarketplace(_marketplaceContract);
+	}
 
 	function setURI(string memory newuri) public onlyOwner {
 		_setURI(newuri);

@@ -11,10 +11,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const hardhat_1 = __importDefault(require("hardhat"));
 async function main() {
     // We get the contract to deploy
-    const Greeter = await hardhat_1.default.ethers.getContractFactory('Greeter');
-    const greeter = await Greeter.deploy('Hello, Hardhat!');
-    await greeter.deployed();
-    console.log('Greeter deployed to:', greeter.address);
+    const ERC20 = await hardhat_1.default.ethers.getContractFactory("ERC20Token");
+    const erc20 = await ERC20.deploy("Test", "TEST");
+    await erc20.deployed();
+    const Marketplace = await hardhat_1.default.ethers.getContractFactory("Marketplace");
+    const marketplace = await Marketplace.deploy(erc20.address, "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 2);
+    await marketplace.deployed();
+    const NFTs = await hardhat_1.default.ethers.getContractFactory("NFTs");
+    const nfts = await NFTs.deploy(erc20.address, marketplace.address);
+    await nfts.deployed();
+    console.log("ERC20 deployed to:", erc20.address);
+    console.log("Marketplace deployed to:", marketplace.address);
+    console.log("NFTs deployed to:", nfts.address);
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

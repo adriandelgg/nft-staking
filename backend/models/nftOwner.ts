@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 export interface INFTOwner {
 	owner: string;
-	tokenIds: number[];
+	tokenIds: string[];
 }
 
 export function validateNFT() {}
@@ -18,6 +18,6 @@ export const NFTOwner = mongoose.model<INFTOwner>(
 			match: /^0x/,
 			required: true
 		},
-		tokenIds: { type: [Number], required: true }
+		tokenIds: { type: [String], required: true }
 	})
 );
