@@ -1,23 +1,29 @@
 NFTs
-Return token IDs for owner ERC721
-Return token IDs for owner ERC1155
+- Return token IDs for owner ERC1155
+- Should get balance of IDs for any contract that you give it.
+- Get all NFTs a user owns
 
-Get all NFTs a user owns
+Deploy => POST => Mint
+
+Justin will use Remix to deployed NFT smart contract,
+then he will do a POST to update the DB with the new contract address.
+The backend will listen for the change event to then create new listeners
+with the new contract address,
+along with all the old ones.
+
 
 MARKETPLACE
 - Display all for sale
 - Display sold (time stamp or recent to help sort by recent if possible)
   - Use event filtering because this will cost a lot in the DB & redundant.
 - All whitelisted NFT contracts
+  - Remove from SC and use DB instead
 
 PERSONAL PAGE
-Display for sale by owner
-Display recently sold by owner
+- Display for sale by owner
+- Display recently sold by owner (Not needed in DB)
 
 All returns should have sortable data like:
 Collection
 Owner
 Price
-
-Staking
--All NFTs a user has staked
