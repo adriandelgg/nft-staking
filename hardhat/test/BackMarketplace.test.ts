@@ -50,5 +50,8 @@ describe("Marketplace", function () {
 		nft2 = nft.connect(bob);
 	});
 
-	it("should sync DB", async () => {});
+	it("should sync DB", async () => {
+		// await nft.mint(owner.address, 1, 1, []);
+		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
+	});
 });

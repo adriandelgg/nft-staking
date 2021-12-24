@@ -28,7 +28,9 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 	mapping(address => uint) public ownerToken;
 
 	event NFTStaked(address indexed staker, uint tokenId, uint blockNumber);
+
 	event NFTUnStaked(address indexed staker, uint tokenId, uint blockNumber);
+
 	event StakePayout(
 		address indexed staker,
 		uint tokenId,
@@ -36,6 +38,7 @@ contract Staking is ERC1155Holder, ReentrancyGuard, Ownable {
 		uint fromBlock,
 		uint toBlock
 	);
+
 	event StakeRewardUpdated(uint rewardPerBlock);
 
 	// Sets the smart contract addresses for the NFT & ERC20 contract, as well as the amount
