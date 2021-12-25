@@ -7,7 +7,7 @@ export interface INFTOwner {
 	contract: {
 		address: string;
 		tokenIds: string[];
-	};
+	}[];
 }
 
 export function validateNFT() {}
@@ -22,15 +22,17 @@ export const NFTOwner = mongoose.model<INFTOwner>(
 			match: /^0x/,
 			required: true
 		},
-		contract: {
-			address: {
-				type: String,
-				minlength: 42,
-				maxlength: 42,
-				match: /^0x/,
-				required: true
-			},
-			tokenIds: { type: [String], required: true }
-		}
+		contract: [
+			{
+				address: {
+					type: String,
+					minlength: 42,
+					maxlength: 42,
+					match: /^0x/,
+					required: true
+				},
+				tokenIds: { type: [String], required: true }
+			}
+		]
 	})
 );
