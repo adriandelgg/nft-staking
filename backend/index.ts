@@ -43,15 +43,15 @@ Contract.find()
 
 // new Contract({ nft: ["s", "g", "h"], staking: ["f", "g", "h"] }).save();
 
-transferSingle(
-	"0x0",
-	account0,
-	account1,
-	1,
-	1,
-	// "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-	account1
-);
+// transferSingle(
+// 	"0x0",
+// 	account0,
+// 	account1,
+// 	1,
+// 	1,
+// 	// "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+// 	account1
+// );
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

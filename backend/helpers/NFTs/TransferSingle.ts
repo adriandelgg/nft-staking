@@ -13,7 +13,7 @@ export async function transferSingle(
 	try {
 		// 1. Check that the traded token is an NFT
 		const isNFT = await nftContract.isNFT(tokenId);
-		tokenId = String(tokenId);
+		tokenId = tokenId.toString();
 		if (!isNFT) return console.warn(`Token ID ${tokenId} is not an NFT`);
 
 		// 2. Find owner with from & tokenId
@@ -60,8 +60,6 @@ export async function transferSingle(
 				);
 				console.log("Added NFT Address: " + added);
 			}
-		} else {
-			console.warn(`Owner already has token ID ${tokenId}`);
 		}
 	} catch (e) {
 		console.error(e);

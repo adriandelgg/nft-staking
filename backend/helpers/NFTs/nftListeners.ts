@@ -6,6 +6,7 @@ import { transferSingle } from "./TransferSingle";
 
 export function nftListeners(address: string) {
 	const contract = NFTs__factory.connect(address, provider);
+	console.log(address);
 	contract.on(
 		"TransferSingle",
 		(
@@ -13,8 +14,7 @@ export function nftListeners(address: string) {
 			from: string,
 			to: string,
 			tokenId: BigNumberish,
-			value: BigNumberish,
-			address: string
+			value: BigNumberish
 		) => transferSingle(operator, from, to, tokenId, value, address)
 	);
 
@@ -25,8 +25,7 @@ export function nftListeners(address: string) {
 			from: string,
 			to: string,
 			tokenId: BigNumberish[],
-			value: BigNumberish[],
-			address: string
+			value: BigNumberish[]
 		) => transferBatch(operator, from, to, tokenId, value, address)
 	);
 }
