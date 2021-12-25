@@ -5,7 +5,8 @@ export async function transferBatch(
 	from: string,
 	to: string,
 	tokenId: BigNumberish[],
-	value: BigNumberish[]
+	value: BigNumberish[],
+	contractAddress: string
 ) {
 	// 1. Check that the traded tokens are NFTs
 }

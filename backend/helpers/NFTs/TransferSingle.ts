@@ -7,7 +7,8 @@ export async function transferSingle(
 	from: string,
 	to: string,
 	tokenId: BigNumberish,
-	value: BigNumberish
+	value: BigNumberish,
+	contractAddress: string
 ) {
 	try {
 		// 1. Check that the traded token is an NFT
