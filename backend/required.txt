@@ -3,6 +3,8 @@ NFTs
 - Should get balance of IDs for any contract that you give it.
 - Get all NFTs a user owns
 
+**Create ReplicaSet to be able to listen to DB changes
+
 Deploy => POST => Mint
 
 Justin will use Remix to deployed NFT smart contract,
