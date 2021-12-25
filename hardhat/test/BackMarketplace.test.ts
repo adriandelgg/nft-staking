@@ -51,7 +51,7 @@ describe("Marketplace", function () {
 	});
 
 	it("should sync DB", async () => {
-		// await nft.mint(owner.address, 1, 1, []);
-		await nft.safeTransferFrom(owner.address, bob.address, 0, 1, []);
+		// await nft.mint(owner.address, 7, 1, []);
+		await nft.safeTransferFrom(owner.address, bob.address, 3, 1, []);
 	});
 });
