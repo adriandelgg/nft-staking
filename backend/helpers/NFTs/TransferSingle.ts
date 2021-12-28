@@ -18,7 +18,7 @@ export async function transferSingle(
 
 		// 2. Find owner with from & tokenId
 		// 3. Remove the NFT from their array in DB
-		const test = await NFTOwner.findOneAndUpdate(
+		await NFTOwner.findOneAndUpdate(
 			{
 				owner: from,
 				"contract.address": address,
@@ -26,7 +26,6 @@ export async function transferSingle(
 			},
 			{ $pull: { "contract.$.tokenIds": tokenId } }
 		);
-		console.log("Test: " + test);
 
 		// 4. Find the new owner in the DB
 		// 5. If it exists, add the tokenId to their array
@@ -40,26 +39,26 @@ export async function transferSingle(
 
 		console.log("Exists1: " + !!exists);
 		// console.log("ownerExists: " + ownerExists);
-		if (!exists) {
-			exists = await NFTOwner.findOne({ owner: to });
-			console.log("Exists2: " + !!exists);
+		if (exists) return;
 
-			if (!exists) {
-				const nft = new NFTOwner({
-					owner: to,
-					contract: [{ address, tokenIds: [tokenId] }]
-				});
-				await nft.save();
-				console.log("New NFT Owner: " + nft);
-			} else {
-				// 6. If not, create a new user with the NFT in there
-				// 7. Use to and tokenId to create a new owner.
-				const added = await NFTOwner.findOneAndUpdate(
-					{ owner: to },
-					{ $push: { contract: { address, tokenIds: [tokenId] } } }
-				);
-				console.log("Added NFT Address: " + added);
-			}
+		exists = await NFTOwner.findOne({ owner: to });
+		console.log("Exists2: " + !!exists);
+
+		if (!exists) {
+			const nft = new NFTOwner({
+				owner: to,
+				contract: [{ address, tokenIds: [tokenId] }]
+			});
+			await nft.save();
+			console.log("New NFT Owner: " + nft);
+		} else {
+			// 6. If not, create a new user with the NFT in there
+			// 7. Use to and tokenId to create a new owner.
+			const added = await NFTOwner.findOneAndUpdate(
+				{ owner: to },
+				{ $push: { contract: { address, tokenIds: [tokenId] } } }
+			);
+			console.log("Added NFT Address: " + added);
 		}
 	} catch (e) {
 		console.error(e);
