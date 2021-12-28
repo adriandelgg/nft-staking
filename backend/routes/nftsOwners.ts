@@ -5,25 +5,35 @@ const router = express.Router();
 
 // Returns all TokenIDs for the given owner's address
 router.get("/allIDs/:userAddress", async (req, res) => {
-	const nfts = await NFTOwner.findOne({ owner: req.params.userAddress }).select(
-		"nft -_id"
-	);
-	if (!nfts) return res.json("User doesn't own any NFTs");
+	try {
+		const nfts = await NFTOwner.findOne({
+			owner: req.params.userAddress
+		}).select("nft -_id");
+		if (!nfts) return res.json("User doesn't own any NFTs");
 
-	res.json(nfts);
+		res.json(nfts);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
 });
 
 // Returns all TokenIDs for the given contract address & owner
 router.get("/tokenIds/:contractAddress/:userAddress", async (req, res) => {
-	const { contractAddress, userAddress } = req.params;
+	try {
+		const { contractAddress, userAddress } = req.params;
 
-	const nfts = await NFTOwner.findOne({
-		owner: userAddress,
-		"contract.address": contractAddress
-	}).select("nft -_id");
+		const nfts = await NFTOwner.findOne({
+			owner: userAddress,
+			"contract.address": contractAddress
+		}).select("nft -_id");
 
-	if (!nfts) return res.json("User doesn't own any NFTs");
-	res.json(nfts);
+		if (!nfts) return res.json("User doesn't own any NFTs");
+		res.json(nfts);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
 });
 
 router.post("/", async (req, res) => {});
