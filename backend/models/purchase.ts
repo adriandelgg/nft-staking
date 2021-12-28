@@ -1,33 +1,39 @@
 import Joi from "joi";
 import mongoose from "mongoose";
 
-export interface IListing {
-	nftContract: string;
-	seller: string;
-	tokenId: number;
-	price: number;
+export interface IPurchase {
+	buyer: string;
+	purchases: {
+		nftContract: string;
+		tokenId: string;
+		price: string;
+	}[];
 }
 
 export function validateSale() {}
 
-export const Listing = mongoose.model<IListing>(
-	"Listings",
+export const Purchase = mongoose.model<IPurchase>(
+	"Purchases",
 	new mongoose.Schema({
-		nftContract: {
+		buyer: {
 			type: String,
 			minlength: 42,
 			maxlength: 42,
 			match: /^0x/,
 			required: true
 		},
-		seller: {
-			type: String,
-			minlength: 42,
-			maxlength: 42,
-			match: /^0x/,
-			required: true
-		},
-		tokenId: { type: Number, required: true },
-		price: { type: Number, required: true }
+		purchases: [
+			{
+				nftContract: {
+					type: String,
+					minlength: 42,
+					maxlength: 42,
+					match: /^0x/,
+					required: true
+				},
+				tokenId: { type: String, required: true },
+				price: { type: String, required: true }
+			}
+		]
 	})
 );

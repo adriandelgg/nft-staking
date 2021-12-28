@@ -698,14 +698,14 @@ export interface Marketplace extends BaseContract {
     "Purchased(address,address,address,uint256,uint256)"(
       nftContract?: string | null,
       seller?: string | null,
-      buyer?: null,
+      buyer?: string | null,
       tokenId?: null,
       price?: null
     ): PurchasedEventFilter;
     Purchased(
       nftContract?: string | null,
       seller?: string | null,
-      buyer?: null,
+      buyer?: string | null,
       tokenId?: null,
       price?: null
     ): PurchasedEventFilter;

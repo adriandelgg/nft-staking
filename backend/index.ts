@@ -9,6 +9,7 @@ import { cancelledSale } from "./helpers/Marketplace/CancelledSale";
 import { purchased } from "./helpers/Marketplace/Purchased";
 import { transferSingle } from "./helpers/NFTs/TransferSingle";
 import { Contract } from "./models/contract";
+import listings from "./routes/listings";
 import { nftListeners } from "./helpers/NFTs/nftListeners";
 
 const account0 = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
@@ -52,6 +53,8 @@ Contract.find()
 // 	// "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 // 	account1
 // );
+
+app.use("/api/listings", listings);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

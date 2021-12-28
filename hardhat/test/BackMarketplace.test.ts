@@ -52,7 +52,11 @@ describe("Marketplace", function () {
 
 	it("should sync DB", async () => {
 		// await nft.mint(owner.address, 2, 1, []);
-		await nft.safeTransferFrom(owner.address, bob.address, 2, 1, []);
+		// await nft.safeTransferFrom(owner.address, bob.address, 2, 1, []);
 		// await nft2.safeTransferFrom(bob.address, owner.address, 2, 1, []);
+		// await market.whitelistNFTContract(nft2.address);
+		// await nft2.sellNFT(2, 1e5);
+		await token.approve(market.address, 1e5);
+		await market.purchaseNFT(nft2.address, 2);
 	});
 });

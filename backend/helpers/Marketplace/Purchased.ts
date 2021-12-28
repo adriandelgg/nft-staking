@@ -8,10 +8,10 @@ export async function purchased(
 	tokenId: BigNumberish,
 	price: BigNumberish
 ) {
-	// Converts them to strings due to the possibility of being over JS's MAX_SAFE_INT
-	tokenId = String(tokenId);
-	price = String(price);
 	try {
+		// Converts them to strings due to the possibility of being over JS's MAX_SAFE_INT
+		tokenId = String(tokenId);
+		price = String(price);
 		// 1. Find tokenId & nftContract in the DB
 		await Listing.findOneAndDelete({ nftContract, seller, tokenId });
 		// 2. If it doesn't exist return

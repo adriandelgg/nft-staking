@@ -7,11 +7,11 @@ export async function listedForSale(
 	tokenId: BigNumberish,
 	price: BigNumberish
 ) {
-	// Converts them to strings due to the possibility of being over JS's MAX_SAFE_INT
-	tokenId = String(tokenId);
-	price = String(price);
-
 	try {
+		// Converts them to strings due to the possibility of being over JS's MAX_SAFE_INT
+		tokenId = String(tokenId);
+		price = String(price);
+
 		// 1. Check DB to see if the listing already exists
 		const listingExists = await Listing.findOne({ nftContract, tokenId });
 		// 2. If it does return
