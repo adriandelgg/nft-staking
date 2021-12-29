@@ -14,6 +14,7 @@ import { nftListener } from "./helpers/NFTs/nftListener";
 
 import listings from "./routes/listings";
 import contracts from "./routes/contracts";
+import nftOwners from "./routes/nftOwners";
 
 const account0 = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 const account1 = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use("/api/listings", listings);
 app.use("/api/contracts", contracts);
+app.use("/api/nftOwners", nftOwners);
 
 // Listens for updates on DB to properly show NFTs for sale
 marketplaceContract.on("ListedForSale", listedForSale);
@@ -43,10 +45,7 @@ marketplaceContract.on("Purchased", purchased);
 // Sets up all event listeners to begin with
 Contract.find()
 	.select("nft -_id")
-	.then(([{ nft }]) => {
-		nft.forEach(nftListener);
-		console.log(nft);
-	})
+	.then(([{ nft }]) => nft.forEach(nftListener))
 	.catch(console.error);
 
 // new Contract({ nft: ["s", "g", "h"], staking: ["f", "g", "h"] }).save();

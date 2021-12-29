@@ -20,7 +20,7 @@ router.get("/soldBy/:contractAddress/:ownerAddress", async (req, res) => {
 		res.json(logsFrom);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -32,7 +32,7 @@ router.get("/allForSale", async (req, res) => {
 		res.json(listings);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -40,7 +40,7 @@ router.get("/", async (req, res) => {
 	try {
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
 	try {
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 

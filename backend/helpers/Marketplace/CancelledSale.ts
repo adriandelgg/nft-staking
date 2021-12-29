@@ -6,9 +6,12 @@ export async function cancelledSale(
 	seller: string,
 	tokenId: BigNumberish
 ) {
-	tokenId = String(tokenId);
 	try {
-		await Listing.findOneAndDelete({ nftContract, seller, tokenId });
+		await Listing.findOneAndDelete({
+			nftContract,
+			seller,
+			tokenId: String(tokenId)
+		});
 	} catch (e) {
 		console.error(e);
 	}

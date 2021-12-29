@@ -1,4 +1,4 @@
-import { Contract } from "../models/contract";
+import { Contract } from "../../models/contract";
 
 export async function newNFTContract(address: string) {
 	try {

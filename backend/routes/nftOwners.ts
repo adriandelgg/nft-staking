@@ -1,5 +1,4 @@
 import express from "express";
-import { marketplaceContract } from "../helpers/contracts";
 import { NFTOwner } from "../models/nftOwner";
 const router = express.Router();
 
@@ -9,12 +8,12 @@ router.get("/allIDs/:userAddress", async (req, res) => {
 		const nfts = await NFTOwner.findOne({
 			owner: req.params.userAddress
 		}).select("nft -_id");
-		if (!nfts) return res.json("User doesn't own any NFTs");
+		if (!nfts) return res.status(404).json("User doesn't own any NFTs");
 
 		res.json(nfts);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -28,11 +27,11 @@ router.get("/tokenIds/:contractAddress/:userAddress", async (req, res) => {
 			"contract.address": contractAddress
 		}).select("nft -_id");
 
-		if (!nfts) return res.json("User doesn't own any NFTs");
+		if (!nfts) return res.status(404).json("User doesn't own any NFTs");
 		res.json(nfts);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 

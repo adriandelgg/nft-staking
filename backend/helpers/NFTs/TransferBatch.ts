@@ -17,7 +17,10 @@ export async function transferBatch(
 			// 1. Check that the traded tokens are NFTs
 			const isNFT = await nftContract.isNFT(id);
 			id = id.toString();
-			if (!isNFT) return console.warn(`Token ID ${id} is not an NFT`);
+			if (!isNFT) {
+				console.warn(`Token ID ${id} is not an NFT`);
+				continue;
+			}
 
 			// 2. Find owner with from & tokenId
 			// 3. Remove the NFT from their array in DB
@@ -40,14 +43,17 @@ export async function transferBatch(
 				{ $push: { "contract.$.tokenIds": id } }
 			);
 
-			console.log("Exists1: " + !!exists);
-			// console.log("ownerExists: " + ownerExists);
-			if (exists) return;
+			if (exists) {
+				console.log(
+					"Owner already exists. Added token ID to their collection."
+				);
+				continue;
+			}
 
 			exists = await NFTOwner.findOne({ owner: to });
-			console.log("Exists2: " + !!exists);
 
 			if (!exists) {
+				console.log("Owner doesn't exist in DB. Adding them in.");
 				const nft = new NFTOwner({
 					owner: to,
 					contract: [{ address, tokenIds: [id] }]
@@ -61,7 +67,7 @@ export async function transferBatch(
 					{ owner: to },
 					{ $push: { contract: { address, tokenIds: [id] } } }
 				);
-				console.log("Added NFT Address: " + added);
+				console.log("Updated with a new NFT Address: " + added);
 			}
 		}
 	} catch (e) {

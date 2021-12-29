@@ -1,6 +1,9 @@
 import express from "express";
 import { nftListener } from "../helpers/NFTs/nftListener";
-import { removeNFTListener } from "../helpers/NFTs/removeNFTListener";
+import {
+	removeNFTListener,
+	removeStakingListener
+} from "../helpers/removeContractListeners";
 import { Contract } from "../models/contract";
 const router = express.Router();
 
@@ -15,7 +18,7 @@ router.get("/all", async (req, res) => {
 		res.json(result);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -30,7 +33,7 @@ router.get("/allNFT", async (req, res) => {
 		res.json(result);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -45,7 +48,7 @@ router.get("/allStaking", async (req, res) => {
 		res.json(result);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -64,7 +67,6 @@ router.post("/newNFTContract", async (req, res) => {
 		if (!contract) {
 			contract = new Contract({ nft: [req.body.address] });
 			contract = await contract.save();
-			// return res.status(404).json("No entries found with the given address.");
 		}
 
 		// Creates a event listener for the new contract address
@@ -73,7 +75,7 @@ router.post("/newNFTContract", async (req, res) => {
 		res.json(contract);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -98,7 +100,7 @@ router.put("/removeNFTContract", async (req, res) => {
 		res.json(result);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -111,12 +113,19 @@ router.put("/removeStakingContract", async (req, res) => {
 			id,
 			{ $pull: { staking: req.body.address } },
 			{ new: true }
-		).select("nft");
+		).select("staking");
+
+		if (!result) {
+			return res.status(404).json("No entry found with the given address.");
+		}
+
+		// Removes the event listeners for the removed Staking contract
+		removeStakingListener(req.body.address);
 
 		res.json(result);
 	} catch (e) {
 		console.error(e);
-		res.json(e);
+		res.status(400).json(e);
 	}
 });
 
