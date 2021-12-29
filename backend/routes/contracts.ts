@@ -1,19 +1,15 @@
 import express from "express";
-import { marketplaceContract } from "../helpers/contracts";
 import { Contract } from "../models/contract";
 const router = express.Router();
 
-router.get("", async (req, res) => {});
-
-router.get("/", async (req, res) => {});
-
-router.post("/newNFTContract", async (req, res) => {
+// Returns all NFT & Staking contracts
+router.get("/all", async (req, res) => {
 	try {
-		// Make sure this is an ID
 		const id = await Contract.find().select("_id");
-		const result = await Contract.findByIdAndUpdate(id, {
-			$push: { nft: req.body.nft }
-		});
+		const result = await Contract.findById(id);
+
+		if (!result) return res.status(404).json("None found");
+
 		res.json(result);
 	} catch (e) {
 		console.error(e);
@@ -21,8 +17,95 @@ router.post("/newNFTContract", async (req, res) => {
 	}
 });
 
-router.put("/", async (req, res) => {});
+// Returns all NFT contracts
+router.get("/allNFT", async (req, res) => {
+	try {
+		const id = await Contract.find().select("_id");
+		const result = await Contract.findById(id).select("nft");
 
-router.delete("/", async (req, res) => {});
+		if (!result) return res.status(404).json("None found");
+
+		res.json(result);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
+});
+
+// Returns all Staking contracts
+router.get("/allStaking", async (req, res) => {
+	try {
+		const id = await Contract.find().select("_id");
+		const result = await Contract.findById(id).select("staking");
+
+		if (!result) return res.status(404).json("None found");
+
+		res.json(result);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
+});
+
+// Adds/Whitelists a new NFT address.
+// Must be passed in as a string, not an array.
+router.post("/newNFTContract", async (req, res) => {
+	try {
+		// Make sure this is an ID
+		const id = await Contract.find().select("_id");
+		const result = await Contract.findByIdAndUpdate(
+			id,
+			{ $push: { nft: req.body.address } },
+			{ new: true }
+		).select("nft");
+
+		if (!result)
+			return res.status(404).json("No entry found with the given address.");
+
+		res.json(result);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
+});
+
+// Removes an NFT address
+router.put("/removeNFTContract", async (req, res) => {
+	try {
+		// Make sure this is an ID
+		const id = await Contract.find().select("_id");
+		const result = await Contract.findByIdAndUpdate(
+			id,
+			{ $pull: { nft: req.body.address } },
+			{ new: true }
+		).select("nft");
+
+		if (!result)
+			return res.status(404).json("No entry found with the given address.");
+
+		res.json(result);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
+});
+
+// Removes an NFT address
+router.put("/removeStakingContract", async (req, res) => {
+	try {
+		// Make sure this is an ID
+		const id = await Contract.find().select("_id");
+		const result = await Contract.findByIdAndUpdate(
+			id,
+			{ $pull: { staking: req.body.address } },
+			{ new: true }
+		).select("nft");
+
+		res.json(result);
+	} catch (e) {
+		console.error(e);
+		res.json(e);
+	}
+});
 
 export default router;

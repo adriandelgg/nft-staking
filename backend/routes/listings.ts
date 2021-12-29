@@ -2,6 +2,7 @@ import express from "express";
 import { marketplaceContract } from "../helpers/contracts";
 const router = express.Router();
 
+// Returns all the NFTs sold by the owner.
 router.get("/soldBy/:contractAddress/:ownerAddress", async (req, res) => {
 	const filterFrom = marketplaceContract.filters.Purchased(
 		null,
@@ -14,8 +15,6 @@ router.get("/soldBy/:contractAddress/:ownerAddress", async (req, res) => {
 		0,
 		"latest"
 	);
-	console.log(logsFrom);
-	// Returns all the NFTs sold by the owner.
 	res.json(logsFrom);
 });
 
