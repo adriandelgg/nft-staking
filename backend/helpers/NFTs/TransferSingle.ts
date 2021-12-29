@@ -1,6 +1,7 @@
 import { BigNumberish } from "ethers";
 import { NFTOwner } from "../../models/nftOwner";
-import { nftContract } from "../contracts";
+import { NFTs__factory } from "../../typechain-types";
+import { provider } from "../contracts";
 
 export async function transferSingle(
 	operator: string,
@@ -11,9 +12,11 @@ export async function transferSingle(
 	address: string
 ) {
 	try {
+		const nftContract = NFTs__factory.connect(address, provider);
+
 		// 1. Check that the traded token is an NFT
 		const isNFT = await nftContract.isNFT(tokenId);
-		tokenId = tokenId.toString();
+		tokenId = String(tokenId);
 		if (!isNFT) return console.warn(`Token ID ${tokenId} is not an NFT`);
 
 		// 2. Find owner with from & tokenId
@@ -37,12 +40,11 @@ export async function transferSingle(
 			{ $push: { "contract.$.tokenIds": tokenId } }
 		);
 
-		console.log("Exists1: " + !!exists);
-		// console.log("ownerExists: " + ownerExists);
-		if (exists) return;
+		if (exists) {
+			return console.log("Added token ID to existing owner's collection.");
+		}
 
 		exists = await NFTOwner.findOne({ owner: to });
-		console.log("Exists2: " + !!exists);
 
 		if (!exists) {
 			const nft = new NFTOwner({
@@ -58,7 +60,7 @@ export async function transferSingle(
 				{ owner: to },
 				{ $push: { contract: { address, tokenIds: [tokenId] } } }
 			);
-			console.log("Added NFT Address: " + added);
+			console.log("Added new NFT Address: " + added);
 		}
 	} catch (e) {
 		console.error(e);

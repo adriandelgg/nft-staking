@@ -10,6 +10,7 @@ export async function listedForSale(
 	try {
 		// Converts them to strings due to the possibility of being over JS's MAX_SAFE_INT
 		tokenId = String(tokenId);
+		// Price is saved as string in Solidity Units to avoid MAX_SAFE_INT error. 1e9
 		price = String(price);
 
 		// 1. Check DB to see if the listing already exists

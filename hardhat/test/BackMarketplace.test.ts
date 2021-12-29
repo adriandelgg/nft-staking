@@ -56,24 +56,27 @@ describe("Marketplace", function () {
 		// await nft2.safeTransferFrom(bob.address, owner.address, 2, 1, []);
 		// await market.whitelistNFTContract(nft2.address);
 		// await nft2.sellNFT(2, 1e5);
-		// await token.approve(market.address, 1e5);
+		await token.approve(market.address, await token.totalSupply());
 		// await market.purchaseNFT(nft2.address, 2);
 	});
 	it("should sell NFT", async () => {
+		// await token.approve(market.address, await token.totalSupply());
+		// await token2.approve(market.address, await token.totalSupply());
 		// await nft.mint(owner.address, 1, 1, []);
 		// await nft.mintBatch(
 		// 	owner.address,
-		// 	// [0, 1, 2, 3, 4, 5],
-		// 	[10, 61, 91, 71, 81, 51],
-		// 	[2, 1, 1, 1, 1, 1],
+		// 	[0, 1, 2, 3, 4, 5, 6],
+		// 	[1, 1, 1, 1, 1, 1, 2],
 		// 	[]
 		// );
-		await nft.safeBatchTransferFrom(
-			owner.address,
-			bob.address,
-			[1, 2, 3, 4, 5],
-			[1, 1, 1, 1, 1],
-			[]
-		);
+		// await market.whitelistNFTContract(nft.address);
+		// await nft2.safeBatchTransferFrom(
+		// 	bob.address,
+		// 	owner.address,
+		// 	[0, 1, 2, 3, 4, 5],
+		// 	[1, 1, 1, 1, 1, 1],
+		// 	[]
+		// );
+		await nft.sellMultipleNFTs([2, 3, 4], [1e6, 1e6, 1e6]);
 	});
 });

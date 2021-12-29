@@ -1,6 +1,7 @@
 import { BigNumberish } from "ethers";
 import { NFTOwner } from "../../models/nftOwner";
-import { nftContract } from "../contracts";
+import { NFTs__factory } from "../../typechain-types";
+import { provider } from "../contracts";
 
 export async function transferBatch(
 	operator: string,
@@ -11,6 +12,7 @@ export async function transferBatch(
 	address: string
 ) {
 	try {
+		const nftContract = NFTs__factory.connect(address, provider);
 		for (let i = 0; i < tokenIds.length; i++) {
 			let id = tokenIds[i];
 
@@ -44,16 +46,13 @@ export async function transferBatch(
 			);
 
 			if (exists) {
-				console.log(
-					"Owner already exists. Added token ID to their collection."
-				);
+				console.log("Added token ID to existing owner's collection.");
 				continue;
 			}
 
 			exists = await NFTOwner.findOne({ owner: to });
 
 			if (!exists) {
-				console.log("Owner doesn't exist in DB. Adding them in.");
 				const nft = new NFTOwner({
 					owner: to,
 					contract: [{ address, tokenIds: [id] }]
@@ -67,7 +66,7 @@ export async function transferBatch(
 					{ owner: to },
 					{ $push: { contract: { address, tokenIds: [id] } } }
 				);
-				console.log("Updated with a new NFT Address: " + added);
+				console.log("Added new NFT Address: " + added);
 			}
 		}
 	} catch (e) {
