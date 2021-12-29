@@ -55,20 +55,22 @@ router.post("/newNFTContract", async (req, res) => {
 	try {
 		// Make sure this is an ID
 		const id = await Contract.find().select("_id");
-		const result = await Contract.findByIdAndUpdate(
+		let contract = await Contract.findByIdAndUpdate(
 			id,
 			{ $push: { nft: req.body.address } },
 			{ new: true }
 		).select("nft");
 
-		if (!result) {
-			return res.status(404).json("No entries found with the given address.");
+		if (!contract) {
+			contract = new Contract({ nft: [req.body.address] });
+			contract = await contract.save();
+			// return res.status(404).json("No entries found with the given address.");
 		}
 
 		// Creates a event listener for the new contract address
 		nftListener(req.body.address);
 
-		res.json(result);
+		res.json(contract);
 	} catch (e) {
 		console.error(e);
 		res.json(e);
