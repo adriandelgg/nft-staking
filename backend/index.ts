@@ -10,7 +10,7 @@ import { cancelledSale } from "./helpers/Marketplace/CancelledSale";
 import { purchased } from "./helpers/Marketplace/Purchased";
 import { transferSingle } from "./helpers/NFTs/TransferSingle";
 import { Contract } from "./models/contract";
-import { nftListeners } from "./helpers/NFTs/nftListeners";
+import { nftListener } from "./helpers/NFTs/nftListener";
 
 import listings from "./routes/listings";
 import contracts from "./routes/contracts";
@@ -44,7 +44,7 @@ marketplaceContract.on("Purchased", purchased);
 Contract.find()
 	.select("nft -_id")
 	.then(([{ nft }]) => {
-		nft.forEach(nftListeners);
+		nft.forEach(nftListener);
 		console.log(nft);
 	})
 	.catch(console.error);

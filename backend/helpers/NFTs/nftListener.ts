@@ -4,9 +4,9 @@ import { provider } from "../contracts";
 import { transferBatch } from "./TransferBatch";
 import { transferSingle } from "./TransferSingle";
 
-export function nftListeners(address: string) {
+export function nftListener(address: string) {
 	const contract = NFTs__factory.connect(address, provider);
-	console.log(address);
+
 	contract.on(
 		"TransferSingle",
 		(

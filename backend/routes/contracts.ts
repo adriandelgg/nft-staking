@@ -1,4 +1,6 @@
 import express from "express";
+import { nftListener } from "../helpers/NFTs/nftListener";
+import { removeNFTListener } from "../helpers/NFTs/removeNFTListener";
 import { Contract } from "../models/contract";
 const router = express.Router();
 
@@ -59,8 +61,12 @@ router.post("/newNFTContract", async (req, res) => {
 			{ new: true }
 		).select("nft");
 
-		if (!result)
-			return res.status(404).json("No entry found with the given address.");
+		if (!result) {
+			return res.status(404).json("No entries found with the given address.");
+		}
+
+		// Creates a event listener for the new contract address
+		nftListener(req.body.address);
 
 		res.json(result);
 	} catch (e) {
@@ -80,8 +86,12 @@ router.put("/removeNFTContract", async (req, res) => {
 			{ new: true }
 		).select("nft");
 
-		if (!result)
+		if (!result) {
 			return res.status(404).json("No entry found with the given address.");
+		}
+
+		// Removes the event listeners for the removed NFT contract
+		removeNFTListener(req.body.address);
 
 		res.json(result);
 	} catch (e) {

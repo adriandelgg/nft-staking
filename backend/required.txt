@@ -16,9 +16,9 @@ along with all the old ones.
 
 MARKETPLACE
 - Display all for sale
-- Display sold (time stamp or recent to help sort by recent if possible)
+- X Display sold (time stamp or recent to help sort by recent if possible)
   - Use event filtering because this will cost a lot in the DB & redundant.
-- All whitelisted NFT contracts
+- X All whitelisted NFT contracts
   - Remove from SC and use DB instead
 
 PERSONAL PAGE
