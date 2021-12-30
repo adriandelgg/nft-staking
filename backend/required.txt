@@ -3,8 +3,6 @@ NFTs
 - X Should get balance of IDs for any contract that you give it.
 - X Get all NFTs a user owns
 
-**Create ReplicaSet to be able to listen to DB changes
-
 Deploy => POST => Mint
 
 Justin will use Remix to deployed NFT smart contract,
@@ -18,13 +16,8 @@ MARKETPLACE
 - X Display all for sale
 - X Display sold (time stamp or recent to help sort by recent if possible)
 - X All whitelisted NFT contracts
-  - Remove from SC and use DB instead
+  - X Remove from SC and use DB instead
 
 PERSONAL PAGE
 - X Display for sale by owner
 - X Display recently sold by owner (Not needed in DB)
-
-All returns should have sortable data like:
-Collection
-Owner
-Price

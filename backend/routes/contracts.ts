@@ -1,10 +1,10 @@
 import express from "express";
+import { Contract } from "../models/contract";
 import { nftListener } from "../helpers/NFTs/nftListener";
 import {
 	removeNFTListener,
 	removeStakingListener
 } from "../helpers/removeContractListeners";
-import { Contract } from "../models/contract";
 const router = express.Router();
 
 // Returns all NFT & Staking contracts

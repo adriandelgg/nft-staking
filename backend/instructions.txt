@@ -1,0 +1,3 @@
+Marketplace Contract:
+- The marketplace contract address must be given
+  to "contract.ts" in the "helpers" folder.
