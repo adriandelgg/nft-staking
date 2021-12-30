@@ -1,4 +1,3 @@
-import Joi from "joi";
 import mongoose from "mongoose";
 
 export interface IPurchase {

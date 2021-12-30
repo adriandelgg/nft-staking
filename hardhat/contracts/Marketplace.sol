@@ -15,10 +15,6 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 	// E.G: 5% = 5, 10% = 10, 50% = 50, etc.
 	uint public feeAmount;
 
-	// A list of all the whitelisted nftContracts
-	// ! Not necessarily needed & mapping would work just fine!
-	address[] public nftContracts;
-
 	// NFT address to bool to check if whitelisted
 	mapping(address => bool) public isWhitelisted;
 
@@ -72,16 +68,6 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 		_;
 	}
 
-	// This returns the length amount of NFT contracts in the array.
-	function totalNFTContracts() public view returns (uint) {
-		return nftContracts.length;
-	}
-
-	// Returns an array of all the whitelisted NFT contracts.
-	function getNFTContracts() public view returns (address[] memory) {
-		return nftContracts;
-	}
-
 	// Sets who the fees go to.
 	function setFeeCollector(address _collector) external onlyOwner {
 		feeCollector = _collector;
@@ -105,7 +91,6 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 			!isWhitelisted[_nftContract],
 			"NFT contract is already whitelisted"
 		);
-		nftContracts.push(_nftContract);
 		isWhitelisted[_nftContract] = true;
 	}
 
@@ -121,14 +106,7 @@ contract Marketplace is ERC1155Holder, ReentrancyGuard, Ownable {
 
 	// Removes a whitelisted NFT contract
 	function unwhitelistNFTContract(address _nftContract) external onlyOwner {
-		address[] memory _nftContracts = nftContracts; // gas saver
-		for (uint i; i < _nftContracts.length; i++) {
-			if (_nftContracts[i] == _nftContract) {
-				nftContracts[i] = _nftContracts[_nftContracts.length - 1];
-				nftContracts.pop();
-				break;
-			}
-		}
+		require(isWhitelisted[_nftContract], "NFT Contract isn't whitelisted");
 		delete isWhitelisted[_nftContract];
 	}
 
