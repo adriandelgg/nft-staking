@@ -1,7 +1,7 @@
 NFTs
 - X Return token IDs for owner ERC1155
-- Should get balance of IDs for any contract that you give it.
-- Get all NFTs a user owns
+- X Should get balance of IDs for any contract that you give it.
+- X Get all NFTs a user owns
 
 **Create ReplicaSet to be able to listen to DB changes
 

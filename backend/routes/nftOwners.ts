@@ -1,5 +1,5 @@
 import express from "express";
-import { INFTOwner, NFTOwner } from "../models/nftOwner";
+import { NFTOwner } from "../models/nftOwner";
 const router = express.Router();
 
 // Returns all TokenIDs for the given owner's address

@@ -38,6 +38,23 @@ router.get("/allSoldBy/:sellerAddress", async (req, res) => {
 	}
 });
 
+router.get("/last20SoldBy/:sellerAddress", async (req, res) => {
+	try {
+		const listings = await Listing.find({
+			seller: req.params.sellerAddress
+		})
+			.select("-__v")
+			.limit(20)
+			.sort("-createdAt");
+		if (!listings.length) return res.status(404).json("No NFTs are for sale");
+
+		res.json(listings);
+	} catch (e) {
+		console.error(e);
+		res.status(400).json(e);
+	}
+});
+
 router.get("/allForSale", async (req, res) => {
 	try {
 		const listings = await Listing.find().select("-__v");

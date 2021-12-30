@@ -77,6 +77,7 @@ describe("Marketplace", function () {
 		// 	[1, 1, 1, 1, 1, 1],
 		// 	[]
 		// );
-		await nft.sellMultipleNFTs([2, 3, 4], [1e6, 1e6, 1e6]);
+		// await nft.sellMultipleNFTs([2, 3, 4], [1e6, 1e6, 1e6]);
+		await market.cancelNFTSale(nft.address, 2);
 	});
 });

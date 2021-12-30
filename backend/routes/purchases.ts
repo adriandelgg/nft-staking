@@ -1,9 +1,9 @@
 import express from "express";
 const router = express.Router();
 
-router.get("/", async (req, res) => {});
+router.get("/allPurchased", async (req, res) => {});
 
-router.post("/", async (req, res) => {});
+router.post("/recentlyPurchased", async (req, res) => {});
 
 router.put("/", async (req, res) => {});
 
