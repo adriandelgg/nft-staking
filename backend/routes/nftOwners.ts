@@ -18,22 +18,25 @@ router.get("/allIDs/:userAddress", async (req, res) => {
 });
 
 // Returns all TokenIDs for the given contract address & owner
-router.get("/tokenIds/:contractAddress/:userAddress", async (req, res) => {
-	try {
-		const { contractAddress, userAddress } = req.params;
+router.get(
+	"/allUsersIDsForContract/:contractAddress/:userAddress",
+	async (req, res) => {
+		try {
+			const { contractAddress, userAddress } = req.params;
 
-		const nfts = await NFTOwner.findOne({
-			owner: userAddress,
-			"contract.address": contractAddress
-		}).select("nft -_id");
+			const nfts = await NFTOwner.findOne({
+				owner: userAddress,
+				"contract.address": contractAddress
+			}).select("nft -_id");
 
-		if (!nfts) return res.status(404).json("User doesn't own any NFTs");
-		res.json(nfts);
-	} catch (e) {
-		console.error(e);
-		res.status(400).json(e);
+			if (!nfts) return res.status(404).json("User doesn't own any NFTs");
+			res.json(nfts);
+		} catch (e) {
+			console.error(e);
+			res.status(400).json(e);
+		}
 	}
-});
+);
 
 // Returns all Owners that own tokens from the contract address
 router.get("/allOwnersForContract/:contractAddress", async (req, res) => {
@@ -61,9 +64,7 @@ router.get("/allIDsForContract/:contractAddress", async (req, res) => {
 		}).select("contract.tokenIds -_id");
 
 		if (!ids.length) {
-			return res
-				.status(404)
-				.json("No Token IDs found for the given contract .");
+			return res.status(404).json("No Token IDs found for the given contract.");
 		}
 
 		const allIds = ids.flatMap(({ contract: [{ tokenIds }] }) => tokenIds);
@@ -74,11 +75,5 @@ router.get("/allIDsForContract/:contractAddress", async (req, res) => {
 		res.status(400).json(e);
 	}
 });
-
-router.post("/", async (req, res) => {});
-
-router.put("/", async (req, res) => {});
-
-router.delete("/", async (req, res) => {});
 
 export default router;

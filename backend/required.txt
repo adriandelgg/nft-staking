@@ -21,8 +21,8 @@ MARKETPLACE
   - Remove from SC and use DB instead
 
 PERSONAL PAGE
-- Display for sale by owner
-- Display recently sold by owner (Not needed in DB)
+- X Display for sale by owner
+- X Display recently sold by owner (Not needed in DB)
 
 All returns should have sortable data like:
 Collection

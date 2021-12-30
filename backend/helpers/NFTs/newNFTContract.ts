@@ -1,6 +1,7 @@
 import { Contract } from "../../models/contract";
 
-export async function newNFTContract(address: string) {
+// Adds a new NFT Contract to the DB
+export const newNFTContract = async (address: string) => {
 	try {
 		const alreadyExists = await Contract.findOne({ nft: [address] });
 		if (alreadyExists) return console.warn("NFT contract already exists!");
@@ -12,4 +13,4 @@ export async function newNFTContract(address: string) {
 	} catch (e) {
 		console.error(e);
 	}
-}
+};
