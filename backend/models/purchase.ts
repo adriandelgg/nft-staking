@@ -9,8 +9,6 @@ export interface IPurchase {
 	}[];
 }
 
-export function validateSale() {}
-
 export const Purchase = mongoose.model<IPurchase>(
 	"Purchases",
 	new mongoose.Schema({

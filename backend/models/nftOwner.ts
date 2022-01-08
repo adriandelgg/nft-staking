@@ -2,14 +2,11 @@ import mongoose from "mongoose";
 
 export interface INFTOwner {
 	owner: string;
-	// tokenIds: string[];
 	contract: {
 		address: string;
 		tokenIds: string[];
 	}[];
 }
-
-export function validateNFT() {}
 
 export const NFTOwner = mongoose.model<INFTOwner>(
 	"NFTOwners",
