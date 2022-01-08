@@ -11,11 +11,7 @@ router.get("/allPurchasedByBuyer/:buyerAddress", async (req, res) => {
 			req.params.buyerAddress
 		);
 
-		const logsFrom = await marketplaceContract.queryFilter(
-			filterFrom,
-			0,
-			"latest"
-		);
+		const logsFrom = await marketplaceContract.queryFilter(filterFrom);
 
 		const results = logsFrom.map(
 			({ args: [nftContract, seller, buyer, tokenId, price] }) => ({
@@ -26,6 +22,11 @@ router.get("/allPurchasedByBuyer/:buyerAddress", async (req, res) => {
 				price
 			})
 		);
+
+		if (!results.length) {
+			return res.status(404).json("This address has not purchased any NFTs.");
+		}
+
 		res.json(results);
 	} catch (e) {
 		console.error(e);
@@ -41,11 +42,7 @@ router.get("/allSoldBySeller/:sellerAddress", async (req, res) => {
 			req.params.sellerAddress
 		);
 
-		const logsFrom = await marketplaceContract.queryFilter(
-			filterFrom,
-			0,
-			"latest"
-		);
+		const logsFrom = await marketplaceContract.queryFilter(filterFrom);
 
 		const results = logsFrom.map(
 			({ args: [nftContract, seller, buyer, tokenId, price] }) => ({
@@ -56,6 +53,10 @@ router.get("/allSoldBySeller/:sellerAddress", async (req, res) => {
 				price
 			})
 		);
+
+		if (!results.length) {
+			return res.status(404).json("This address has not sold any NFTs.");
+		}
 
 		res.json(results);
 	} catch (e) {
