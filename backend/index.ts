@@ -1,8 +1,10 @@
 require("dotenv").config();
 import express from "express";
 import mongoose from "mongoose";
+import hpp from "hpp";
 import cors from "cors";
 import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
 
 import { marketplaceContract } from "./helpers/contracts";
 import { listedForSale } from "./helpers/Marketplace/ListedForSale";
@@ -26,8 +28,10 @@ mongoose
 // Middleware
 app.use(cors());
 app.use(helmet());
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(mongoSanitize());
+app.use(hpp());
 
 // API Routes
 app.use("/api/listings", listings);
