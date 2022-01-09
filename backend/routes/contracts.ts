@@ -7,6 +7,7 @@ import {
 } from "../helpers/removeContractListeners";
 import { admin } from "../middleware/admin";
 import { verifyToken } from "../middleware/verifyToken";
+import { isAddress } from "ethers/lib/utils";
 const router = express.Router();
 
 // Returns all NFT & Staking contracts
@@ -58,8 +59,16 @@ router.get("/allStaking", async (req, res) => {
 // Must be passed in as a string, not an array.
 router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 	try {
+		const validAddress = isAddress(req.body.address);
+		if (!validAddress) return res.status(400).json("Invalid ETH address!");
 		// Make sure this is an ID
+		const exists = await Contract.findOne({
+			nft: { $in: [req.body.address] }
+		});
+		if (exists) return res.status(400).json("Address already in database!");
+
 		const id = await Contract.find().select("_id");
+
 		let contract = await Contract.findByIdAndUpdate(
 			id,
 			{ $push: { nft: req.body.address } },
@@ -73,6 +82,38 @@ router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 
 		// Creates a event listener for the new contract address
 		nftListener(req.body.address);
+
+		res.json(contract);
+	} catch (e) {
+		console.error(e);
+		res.status(400).json(e);
+	}
+});
+
+// Adds/Whitelists a new Staking address.
+// Must be passed in as a string, not an array.
+router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
+	try {
+		const validAddress = isAddress(req.body.address);
+		if (!validAddress) return res.status(400).json("Invalid ETH address!");
+		// Make sure this is an ID
+		const exists = await Contract.findOne({
+			staking: { $in: [req.body.address] }
+		});
+		if (exists) return res.status(400).json("Address already in database!");
+
+		const id = await Contract.find().select("_id");
+
+		let contract = await Contract.findByIdAndUpdate(
+			id,
+			{ $push: { staking: req.body.address } },
+			{ new: true }
+		).select("staking");
+
+		if (!contract) {
+			contract = new Contract({ staking: [req.body.address] });
+			contract = await contract.save();
+		}
 
 		res.json(contract);
 	} catch (e) {

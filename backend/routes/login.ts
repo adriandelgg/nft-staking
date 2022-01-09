@@ -49,7 +49,7 @@ router.post("/", async (req, res) => {
 		}
 
 		const token = user.generateAuthToken();
-		res.send(token);
+		res.json(token);
 	} catch (e) {
 		console.error(e);
 		res.status(400).json(e);
