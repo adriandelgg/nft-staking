@@ -61,7 +61,7 @@ router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 	try {
 		const validAddress = isAddress(req.body.address);
 		if (!validAddress) return res.status(400).json("Invalid ETH address!");
-		// Make sure this is an ID
+
 		const exists = await Contract.findOne({
 			nft: { $in: [req.body.address] }
 		});
@@ -96,7 +96,7 @@ router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
 	try {
 		const validAddress = isAddress(req.body.address);
 		if (!validAddress) return res.status(400).json("Invalid ETH address!");
-		// Make sure this is an ID
+
 		const exists = await Contract.findOne({
 			staking: { $in: [req.body.address] }
 		});
