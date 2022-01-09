@@ -11,7 +11,7 @@ export function verifyToken(req: any, res: Response, next: NextFunction) {
 
 	try {
 		// Throws an exception if token is not valid.
-		const decoded = jwt.verify(token, "secret");
+		const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
 		req.user = decoded;
 		next();
 	} catch (e) {
