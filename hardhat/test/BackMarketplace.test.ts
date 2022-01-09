@@ -59,16 +59,17 @@ describe("Marketplace", function () {
 		await token.approve(market.address, await token.totalSupply());
 		// await market.purchaseNFT(nft2.address, 2);
 	});
+
 	it("should sell NFT", async () => {
 		// await token.approve(market.address, await token.totalSupply());
 		// await token2.approve(market.address, await token.totalSupply());
 		// await nft.mint(owner.address, 1, 1, []);
-		// await nft.mintBatch(
-		// 	owner.address,
-		// 	[0, 1, 2, 3, 4, 5, 6],
-		// 	[1, 1, 1, 1, 1, 1, 2],
-		// 	[]
-		// );
+		await nft.mintBatch(
+			owner.address,
+			[0, 1, 2, 3, 4, 5, 6],
+			[1, 1, 1, 1, 1, 1, 2],
+			[]
+		);
 		// await market.whitelistNFTContract(nft.address);
 		// await nft2.safeBatchTransferFrom(
 		// 	bob.address,
@@ -77,9 +78,9 @@ describe("Marketplace", function () {
 		// 	[1, 1, 1, 1, 1, 1],
 		// 	[]
 		// );
-		await nft.sellNFT(2, 1e6);
+		// await nft.sellNFT(2, 1e6);
 		// await nft.sellMultipleNFTs([2, 3, 4], [1e6, 1e6, 1e6]);
 		// await market.cancelNFTSale(nft.address, 2);
-		await market2.purchaseNFT(nft.address, 2);
+		// await market2.purchaseNFT(nft.address, 2);
 	});
 });

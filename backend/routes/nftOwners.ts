@@ -2,7 +2,7 @@ import express from "express";
 import { NFTOwner } from "../models/nftOwner";
 const router = express.Router();
 
-// Returns all TokenIDs for the given owner's address
+// Returns all owned TokenIDs for the given owner's address
 router.get("/allIDs/:userAddress", async (req, res) => {
 	try {
 		const nfts = await NFTOwner.findOne({

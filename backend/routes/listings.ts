@@ -2,12 +2,10 @@ import express from "express";
 import { Listing } from "../models/listing";
 const router = express.Router();
 
-// Returns all the NFTs sold by the owner.
-router.get("/allForSaleBy/:sellerAddress", async (req, res) => {
+// Returns all NFTs that are for sale
+router.get("/allForSale", async (req, res) => {
 	try {
-		const listings = await Listing.find({
-			seller: req.params.sellerAddress
-		}).select("-__v");
+		const listings = await Listing.find().select("-__v");
 		if (!listings.length) return res.status(404).json("No NFTs are for sale");
 
 		res.json(listings);
@@ -17,10 +15,12 @@ router.get("/allForSaleBy/:sellerAddress", async (req, res) => {
 	}
 });
 
-// Returns all NFTs that are for sale
-router.get("/allForSale", async (req, res) => {
+// Returns all the NFTs sold by the owner.
+router.get("/allForSaleBy/:sellerAddress", async (req, res) => {
 	try {
-		const listings = await Listing.find().select("-__v");
+		const listings = await Listing.find({
+			seller: req.params.sellerAddress
+		}).select("-__v");
 		if (!listings.length) return res.status(404).json("No NFTs are for sale");
 
 		res.json(listings);

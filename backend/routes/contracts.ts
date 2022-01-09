@@ -7,7 +7,7 @@ import {
 } from "../helpers/removeContractListeners";
 import { admin } from "../middleware/admin";
 import { verifyToken } from "../middleware/verifyToken";
-import { isAddress } from "ethers/lib/utils";
+import { getAddress, isAddress } from "ethers/lib/utils";
 const router = express.Router();
 
 // Returns all NFT & Staking contracts
@@ -59,11 +59,12 @@ router.get("/allStaking", async (req, res) => {
 // Must be passed in as a string, not an array.
 router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 	try {
-		const validAddress = isAddress(req.body.address);
+		const address = getAddress(req.body.address.toLowerCase()); // checksums address
+		const validAddress = isAddress(address);
 		if (!validAddress) return res.status(400).json("Invalid ETH address!");
 
 		const exists = await Contract.findOne({
-			nft: { $in: [req.body.address] }
+			nft: { $in: [address] }
 		});
 		if (exists) return res.status(400).json("Address already in database!");
 
@@ -71,17 +72,17 @@ router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 
 		let contract = await Contract.findByIdAndUpdate(
 			id,
-			{ $push: { nft: req.body.address } },
+			{ $push: { nft: address } },
 			{ new: true }
 		).select("nft");
 
 		if (!contract) {
-			contract = new Contract({ nft: [req.body.address] });
+			contract = new Contract({ nft: [address] });
 			contract = await contract.save();
 		}
 
 		// Creates a event listener for the new contract address
-		nftListener(req.body.address);
+		nftListener(address);
 
 		res.json(contract);
 	} catch (e) {
@@ -94,11 +95,12 @@ router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 // Must be passed in as a string, not an array.
 router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
 	try {
-		const validAddress = isAddress(req.body.address);
+		const address = getAddress(req.body.address.toLowerCase()); // checksums address
+		const validAddress = isAddress(address);
 		if (!validAddress) return res.status(400).json("Invalid ETH address!");
 
 		const exists = await Contract.findOne({
-			staking: { $in: [req.body.address] }
+			staking: { $in: [address] }
 		});
 		if (exists) return res.status(400).json("Address already in database!");
 
@@ -106,12 +108,12 @@ router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
 
 		let contract = await Contract.findByIdAndUpdate(
 			id,
-			{ $push: { staking: req.body.address } },
+			{ $push: { staking: address } },
 			{ new: true }
 		).select("staking");
 
 		if (!contract) {
-			contract = new Contract({ staking: [req.body.address] });
+			contract = new Contract({ staking: [address] });
 			contract = await contract.save();
 		}
 
@@ -122,7 +124,7 @@ router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
 	}
 });
 
-// Removes an NFT address
+// Removes an NFT contract address
 router.put("/removeNFTContract", verifyToken, admin, async (req, res) => {
 	try {
 		// Make sure this is an ID
@@ -147,7 +149,7 @@ router.put("/removeNFTContract", verifyToken, admin, async (req, res) => {
 	}
 });
 
-// Removes an NFT address
+// Removes a Staking contract address
 router.put("/removeStakingContract", verifyToken, admin, async (req, res) => {
 	try {
 		// Make sure this is an ID
