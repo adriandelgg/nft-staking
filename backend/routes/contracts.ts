@@ -5,6 +5,8 @@ import {
 	removeNFTListener,
 	removeStakingListener
 } from "../helpers/removeContractListeners";
+import { admin } from "../middleware/admin";
+import { verifyToken } from "../middleware/verifyToken";
 const router = express.Router();
 
 // Returns all NFT & Staking contracts
@@ -54,7 +56,7 @@ router.get("/allStaking", async (req, res) => {
 
 // Adds/Whitelists a new NFT address.
 // Must be passed in as a string, not an array.
-router.post("/newNFTContract", async (req, res) => {
+router.post("/newNFTContract", verifyToken, admin, async (req, res) => {
 	try {
 		// Make sure this is an ID
 		const id = await Contract.find().select("_id");
@@ -80,7 +82,7 @@ router.post("/newNFTContract", async (req, res) => {
 });
 
 // Removes an NFT address
-router.put("/removeNFTContract", async (req, res) => {
+router.put("/removeNFTContract", verifyToken, admin, async (req, res) => {
 	try {
 		// Make sure this is an ID
 		const id = await Contract.find().select("_id");
@@ -105,7 +107,7 @@ router.put("/removeNFTContract", async (req, res) => {
 });
 
 // Removes an NFT address
-router.put("/removeStakingContract", async (req, res) => {
+router.put("/removeStakingContract", verifyToken, admin, async (req, res) => {
 	try {
 		// Make sure this is an ID
 		const id = await Contract.find().select("_id");

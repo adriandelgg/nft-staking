@@ -13,6 +13,7 @@ import { purchased } from "./helpers/Marketplace/Purchased";
 import { Contract } from "./models/contract";
 import { nftListener } from "./helpers/NFTs/nftListener";
 
+import login from "./routes/login";
 import listings from "./routes/listings";
 import contracts from "./routes/contracts";
 import nftOwners from "./routes/nftOwners";
@@ -34,6 +35,7 @@ app.use(mongoSanitize());
 app.use(hpp());
 
 // API Routes
+app.use("/api/login", login);
 app.use("/api/listings", listings);
 app.use("/api/contracts", contracts);
 app.use("/api/nftOwners", nftOwners);

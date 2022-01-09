@@ -6,6 +6,7 @@ export interface IUser {
 	email: string;
 	password: string;
 	isAdmin: boolean;
+	generateAuthToken: () => string;
 }
 
 export function validateUser(user: IUser) {
@@ -21,14 +22,11 @@ export function validateUser(user: IUser) {
 const userSchema = new mongoose.Schema({
 	email: { type: String, unique: true, required: true, min: 5, maxlength: 40 },
 	password: { type: String, required: true, min: 10, max: 1024 },
-	isAdmin: Boolean
+	isAdmin: { type: Boolean, default: false }
 });
 
 userSchema.methods.generateAuthToken = function () {
-	return jwt.sign(
-		{ _id: this._id, isAdmin: this.isAdmin },
-		config.get("jwtPrivateKey")
-	);
+	return jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, "secret");
 };
 
-export const User = mongoose.model("Users", userSchema);
+export const User = mongoose.model<IUser>("Users", userSchema);
