@@ -1,6 +1,7 @@
 import { BigNumberish } from "ethers";
 import { Listing } from "../../models/listing";
 
+/** Event listener for when an NFT has been purchased */
 export async function purchased(
 	nftContract: string,
 	seller: string,

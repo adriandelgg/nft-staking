@@ -4,6 +4,7 @@ import { provider } from "../connections";
 import { transferBatch } from "./TransferBatch";
 import { transferSingle } from "./TransferSingle";
 
+// Helps setup the NFT event listeners for NFT contracts
 export function nftListener(address: string) {
 	const contract = NFTs__factory.connect(address, provider);
 

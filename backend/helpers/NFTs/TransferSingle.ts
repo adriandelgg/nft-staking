@@ -3,6 +3,7 @@ import { NFTOwner } from "../../models/nftOwner";
 import { NFTs__factory } from "../../typechain-types";
 import { provider } from "../connections";
 
+// Event listener for when a TransferSingle event happens
 export async function transferSingle(
 	operator: string,
 	from: string,

@@ -22,7 +22,7 @@ import purchases from "./routes/purchases";
 const app = express();
 
 mongoose
-	.connect("mongodb://localhost:27017/justin")
+	.connect("mongodb://localhost:27017/justin") // <- Add new MongoDB cluster URL here
 	.then(() => console.log("Connected to MongoDB..."))
 	.catch(err => console.error("FAILED to connect to MongoDB: " + err));
 
@@ -46,7 +46,12 @@ marketplaceContract.on("ListedForSale", listedForSale);
 marketplaceContract.on("CancelledSale", cancelledSale);
 marketplaceContract.on("Purchased", purchased);
 
-// Sets up all event listeners to begin with
+/**
+ * Sets up all event listeners to begin with.
+ * Every time the backend is restarted, this will run
+ * to setup event listeners for all NFT contract addresses
+ * that are in the DB.
+ */
 Contract.find()
 	.select("nft -_id")
 	.then(([{ nft }]) => nft.forEach(nftListener))

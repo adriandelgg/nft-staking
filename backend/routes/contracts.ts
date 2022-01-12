@@ -112,6 +112,7 @@ router.post("/newStakingContract", verifyToken, admin, async (req, res) => {
 			{ new: true }
 		).select("staking");
 
+		// If contract doesn't exist, create a new one
 		if (!contract) {
 			contract = new Contract({ staking: [address] });
 			contract = await contract.save();
