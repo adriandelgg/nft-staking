@@ -1,5 +1,5 @@
 import express from "express";
-import { marketplaceContract } from "../helpers/contracts";
+import { marketplaceContract } from "../helpers/connections";
 const router = express.Router();
 
 // Returns all events where the buyer bought an NFT from oldest to newest

@@ -1,5 +1,5 @@
 import { NFTs__factory, Staking__factory } from "../typechain-types";
-import { provider } from "./contracts";
+import { provider } from "./connections";
 
 export const removeNFTListener = (address: string) =>
 	NFTs__factory.connect(address, provider).removeAllListeners();

@@ -6,7 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 
-import { marketplaceContract } from "./helpers/contracts";
+import { marketplaceContract } from "./helpers/connections";
 import { listedForSale } from "./helpers/Marketplace/ListedForSale";
 import { cancelledSale } from "./helpers/Marketplace/CancelledSale";
 import { purchased } from "./helpers/Marketplace/Purchased";

@@ -1,6 +1,6 @@
 import { BigNumberish } from "ethers";
 import { NFTs__factory } from "../../typechain-types";
-import { provider } from "../contracts";
+import { provider } from "../connections";
 import { transferBatch } from "./TransferBatch";
 import { transferSingle } from "./TransferSingle";
 

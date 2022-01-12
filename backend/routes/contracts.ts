@@ -1,20 +1,20 @@
 import express from "express";
-import { Contract } from "../models/contract";
-import { nftListener } from "../helpers/NFTs/nftListener";
+import { getAddress, isAddress } from "ethers/lib/utils";
 import {
 	removeNFTListener,
 	removeStakingListener
 } from "../helpers/removeContractListeners";
+import { nftListener } from "../helpers/NFTs/nftListener";
 import { admin } from "../middleware/admin";
 import { verifyToken } from "../middleware/verifyToken";
-import { getAddress, isAddress } from "ethers/lib/utils";
+import { Contract } from "../models/contract";
 const router = express.Router();
 
 // Returns all NFT & Staking contracts
 router.get("/all", async (req, res) => {
 	try {
 		const id = await Contract.find().select("_id");
-		const result = await Contract.findById(id);
+		const result = await Contract.findById(id).select("nft staking");
 
 		if (!result) return res.status(404).json("None found");
 

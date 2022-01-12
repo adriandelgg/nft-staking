@@ -1,7 +1,7 @@
 import { BigNumberish } from "ethers";
 import { NFTOwner } from "../../models/nftOwner";
 import { NFTs__factory } from "../../typechain-types";
-import { provider } from "../contracts";
+import { provider } from "../connections";
 
 export async function transferSingle(
 	operator: string,

@@ -8,8 +8,7 @@ Deploy => POST => Mint
 Justin will use Remix to deployed NFT smart contract,
 then he will do a POST to update the DB with the new contract address.
 The backend will listen for the change event to then create new listeners
-with the new contract address,
-along with all the old ones.
+with the new contract address, along with all the old ones.
 
 
 MARKETPLACE

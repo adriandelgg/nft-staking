@@ -19,11 +19,14 @@ router.post("/newUser", async (req, res) => {
 		if (user) return res.status(400).send("Email is already used.");
 
 		user = new User(value);
+
 		const salt = await bcrypt.genSalt();
 		user.password = await bcrypt.hash(user.password, salt);
+
 		user = await user.save();
 
 		const token = user.generateAuthToken();
+
 		res
 			.header("x-auth-token", token)
 			.send({ _id: user._id, email: value.email });
@@ -49,7 +52,10 @@ router.post("/", async (req, res) => {
 		}
 
 		const token = user.generateAuthToken();
-		res.json(token);
+
+		res
+			.header("x-auth-token", token)
+			.send({ _id: user._id, email: value.email });
 	} catch (e) {
 		console.error(e);
 		res.status(400).json(e);
