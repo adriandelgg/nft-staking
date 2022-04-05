@@ -1,9 +1,9 @@
-import express from "express";
-import { marketplaceContract } from "../helpers/connections";
+import express from 'express';
+import { marketplaceContract } from '../helpers/connections';
 const router = express.Router();
 
 // Returns all events where the buyer bought an NFT from oldest to newest
-router.get("/allPurchasedByBuyer/:buyerAddress", async (req, res) => {
+router.get('/allPurchasedByBuyer/:buyerAddress', async (req, res) => {
 	try {
 		const filterFrom = marketplaceContract.filters.Purchased(
 			null,
@@ -24,7 +24,7 @@ router.get("/allPurchasedByBuyer/:buyerAddress", async (req, res) => {
 		);
 
 		if (!results.length) {
-			return res.status(404).json("This address has not purchased any NFTs.");
+			return res.status(404).json('This address has not purchased any NFTs.');
 		}
 
 		res.json(results);
@@ -35,7 +35,7 @@ router.get("/allPurchasedByBuyer/:buyerAddress", async (req, res) => {
 });
 
 // Returns all the events where the seller completed a sale from oldest to newest
-router.get("/allSoldBySeller/:sellerAddress", async (req, res) => {
+router.get('/allSoldBySeller/:sellerAddress', async (req, res) => {
 	try {
 		const filterFrom = marketplaceContract.filters.Purchased(
 			null,
@@ -55,7 +55,7 @@ router.get("/allSoldBySeller/:sellerAddress", async (req, res) => {
 		);
 
 		if (!results.length) {
-			return res.status(404).json("This address has not sold any NFTs.");
+			return res.status(404).json('This address has not sold any NFTs.');
 		}
 
 		res.json(results);
